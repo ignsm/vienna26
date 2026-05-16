@@ -1,7 +1,7 @@
 import { db, rooms, voters, douze } from "@/lib/db"
 import { eq, inArray } from "drizzle-orm"
-import { notFound, redirect } from "next/navigation"
-import { getVoterToken } from "@/lib/auth"
+import { notFound } from "next/navigation"
+import { getHostToken } from "@/lib/auth"
 import { getT } from "@/lib/i18n/server"
 import { CONTESTANTS, getContestant } from "@/lib/contestants"
 import { spearman, topKHitRate } from "@/lib/scoring"
@@ -18,8 +18,12 @@ export default async function VsRealityPage({ params }: { params: Promise<{ code
   const room = await db.select().from(rooms).where(eq(rooms.code, code)).limit(1)
   if (room.length === 0) notFound()
 
-  const voterToken = await getVoterToken(code)
-  if (!voterToken) redirect(`/join?code=${code}`)
+  // Anyone with the room URL can view the reality comparison — no voter cookie
+  // required. Private (solo) rooms still hide from non-hosts so a stranger
+  // with a guessed code can't peek at someone's solo session.
+  const hostToken = await getHostToken(code)
+  const isHost = hostToken === room[0].hostToken
+  if (room[0].isPrivate && !isHost) notFound()
 
   const { t } = await getT()
 
