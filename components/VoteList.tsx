@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useTransition, useCallback, useRef } from "react"
 import Link from "next/link"
+import type { Route } from "next"
 import type { Contestant } from "@/lib/contestants"
 import { castVote } from "@/lib/actions/votes"
+import { NavButton } from "@/components/NavButton"
 
 type VoteState = {
   vocal?: number
@@ -431,12 +433,12 @@ export function VoteList({ roomCode, contestants, initialVotes }: Props) {
                 ? "Теперь финал — раздай свой топ-10. Первому 12 баллов, дальше 10, 8, 7, 6, 5, 4, 3, 2, 1."
                 : "Time for the final round — distribute your 12 points to your top 10."}
             </p>
-            <Link
-              href={`/r/${roomCode}/douze`}
+            <NavButton
+              href={`/r/${roomCode}/douze` as Route}
               className="block w-full py-3.5 rounded-2xl bg-white text-black font-bold text-base hover:bg-white/95 transition shadow-lg"
             >
               {lang === "ru" ? "Раздать 12 баллов →" : "Distribute 12 points →"}
-            </Link>
+            </NavButton>
             <button
               onClick={() => setCompleteModal(false)}
               className="block w-full mt-2 py-2 text-white/80 hover:text-white text-xs underline underline-offset-2"
