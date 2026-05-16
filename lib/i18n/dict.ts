@@ -9,6 +9,7 @@ const en: Dict = {
   "home.subtitle": "Watch the final with your friends, rate every act, then split your 12 points at the end. Like a real jury.",
   "home.create": "Create room",
   "home.join": "Join with code",
+  "home.solo": "I'm watching alone →",
   "home.footer": "Final — May 16, 2026, 21:00 CET.",
 
   "create.title": "Create a room",
@@ -97,6 +98,7 @@ const ru: Dict = {
   "home.subtitle": "Смотрим финал с друзьями, ставим оценки за каждый номер, а в конце раздаём свои 12 баллов. Как настоящее жюри.",
   "home.create": "Создать комнату",
   "home.join": "Войти по коду",
+  "home.solo": "Смотрю один →",
   "home.footer": "Финал — 16 мая 2026, 21:00 CET.",
 
   "create.title": "Создать комнату",

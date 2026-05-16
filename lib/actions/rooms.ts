@@ -12,6 +12,32 @@ const NameSchema = z.string().trim().min(1).max(32)
 const RoomNameSchema = z.string().trim().min(1).max(48).optional()
 const CodeSchema = z.string().trim().toUpperCase().regex(/^[A-Z0-9]{3,8}$/)
 
+/**
+ * One-click solo room for users without a party. Reuses the same room/voter
+ * infrastructure so all features (save, share, vs-reality) work identically.
+ */
+export async function createSoloRoom() {
+  const hostName = "You"
+
+  let code = newRoomCode()
+  for (let i = 0; i < 8; i++) {
+    const existing = await db.select({ code: rooms.code }).from(rooms).where(eq(rooms.code, code)).limit(1)
+    if (existing.length === 0) break
+    code = newRoomCode()
+  }
+
+  const hostToken = newToken()
+  await db.insert(rooms).values({ code, name: "Solo session", hostToken, hostName })
+
+  const voterToken = newToken()
+  await db.insert(voters).values({ roomCode: code, token: voterToken, displayName: hostName })
+
+  await setHostCookie(code, hostToken)
+  await setVoterCookie(code, voterToken)
+
+  redirect(`/r/${code}`)
+}
+
 export async function createRoom(formData: FormData) {
   const hostName = NameSchema.parse(formData.get("name"))
   const rawRoomName = formData.get("roomName")

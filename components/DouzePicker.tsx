@@ -12,12 +12,13 @@ type Props = {
   contestants: Contestant[]
   initialPicks: { contestantId: number; points: number }[]
   myRatings?: { contestantId: number; sum: number }[]
+  myVoterId?: string
   lang?: "en" | "ru"
 }
 
 const POINTS = [...DOUZE_POINTS] // [12, 10, 8, 7, 6, 5, 4, 3, 2, 1]
 
-export function DouzePicker({ roomCode, contestants, initialPicks, myRatings = [], lang = "en" }: Props) {
+export function DouzePicker({ roomCode, contestants, initialPicks, myRatings = [], myVoterId, lang = "en" }: Props) {
   const initialOrder: (number | null)[] = POINTS.map((p) => {
     const found = initialPicks.find((pk) => pk.points === p)
     return found ? found.contestantId : null
@@ -199,19 +200,38 @@ export function DouzePicker({ roomCode, contestants, initialPicks, myRatings = [
         </button>
 
         {submitted && (
-          <Link
-            href={`/r/${roomCode}/results`}
-            className="block text-center rounded-2xl border border-[color:var(--gold)]/40 bg-[color:var(--gold)]/15 hover:bg-[color:var(--gold)]/25 transition px-5 py-4"
-          >
-            <p className="text-[color:var(--gold)] font-bold">
-              ✓ {lang === "ru" ? "Отправлено · смотри лидерборд" : "Submitted · see leaderboard"} →
-            </p>
-            <p className="text-white/70 text-xs mt-1">
-              {lang === "ru"
-                ? "Твои 12 баллов уже в зачёте комнаты."
-                : "Your 12 points are in the room totals."}
-            </p>
-          </Link>
+          <div className="space-y-2">
+            <Link
+              href={`/r/${roomCode}/results`}
+              className="block text-center rounded-2xl border border-[color:var(--gold)]/40 bg-[color:var(--gold)]/15 hover:bg-[color:var(--gold)]/25 transition px-5 py-4"
+            >
+              <p className="text-[color:var(--gold)] font-bold">
+                ✓ {lang === "ru" ? "Отправлено · смотри лидерборд" : "Submitted · see leaderboard"} →
+              </p>
+              <p className="text-white/70 text-xs mt-1">
+                {lang === "ru"
+                  ? "Твои 12 баллов уже в зачёте комнаты."
+                  : "Your 12 points are in the room totals."}
+              </p>
+            </Link>
+            {myVoterId && (
+              <a
+                href={`/r/${roomCode}/story/${myVoterId}`}
+                target="_blank"
+                rel="noreferrer"
+                className="block text-center rounded-2xl border border-white/20 bg-white/[0.06] hover:bg-white/[0.12] transition px-5 py-3"
+              >
+                <p className="text-white font-bold text-sm">
+                  📸 {lang === "ru" ? "Картинка для сторис (1080×1920)" : "Download story image (1080×1920)"}
+                </p>
+                <p className="text-white/55 text-xs mt-0.5">
+                  {lang === "ru"
+                    ? "Открой, сохрани, кидай в инсту."
+                    : "Open, save, post to Instagram."}
+                </p>
+              </a>
+            )}
+          </div>
         )}
       </div>
     </div>

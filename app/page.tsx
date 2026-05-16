@@ -2,6 +2,7 @@ import Link from "next/link"
 import { getT } from "@/lib/i18n/server"
 import { RecentRoomsList } from "@/components/RecentRoomsList"
 import { MadeAt } from "@/components/MadeAt"
+import { createSoloRoom } from "@/lib/actions/rooms"
 
 export default async function HomePage() {
   const { lang, t } = await getT()
@@ -16,13 +17,20 @@ export default async function HomePage() {
         <p className="text-white/80 max-w-md mx-auto text-lg">{t("home.subtitle")}</p>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm">
-        <Link href="/create" className="pill-pink flex-1 text-base">
-          {t("home.create")}
-        </Link>
-        <Link href="/join" className="pill-outline flex-1 text-base">
-          {t("home.join")}
-        </Link>
+      <div className="flex flex-col gap-3 w-full max-w-sm">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <Link href="/create" className="pill-pink flex-1 text-base">
+            {t("home.create")}
+          </Link>
+          <Link href="/join" className="pill-outline flex-1 text-base">
+            {t("home.join")}
+          </Link>
+        </div>
+        <form action={createSoloRoom}>
+          <button type="submit" className="w-full text-white/55 hover:text-white text-xs underline underline-offset-2 py-1">
+            {t("home.solo")}
+          </button>
+        </form>
       </div>
 
       <RecentRoomsList lang={lang} />

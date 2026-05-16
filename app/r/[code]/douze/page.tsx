@@ -63,6 +63,7 @@ export default async function DouzePage({ params }: { params: Promise<{ code: st
             contestantId: v.contestantId,
             sum: v.vocal + v.performance + v.song + v.hotness,
           }))}
+          myVoterId={me[0].id}
           lang={lang}
         />
       </section>
