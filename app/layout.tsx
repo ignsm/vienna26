@@ -1,6 +1,8 @@
 import "./globals.css"
 import { Inter, Sora } from "next/font/google"
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
+import { getLang } from "@/lib/i18n/server"
+import { GlobalLangToggle } from "@/components/GlobalLangToggle"
 
 const sora = Sora({
   subsets: ["latin"],
@@ -9,20 +11,39 @@ const sora = Sora({
 })
 
 const inter = Inter({
-  subsets: ["latin"],
+  subsets: ["latin", "cyrillic"],
   variable: "--font-body",
-  weight: ["400", "500", "600"],
+  weight: ["400", "500", "600", "700"],
 })
 
 export const metadata: Metadata = {
-  title: "vienna26 — домашнее жюри Евровидения",
-  description: "Голосуй с друзьями за номера финала Eurovision 2026 и сравни свой топ с реальностью.",
+  title: "vienna26 — home jury for Eurovision",
+  description: "Vote with friends on Eurovision 2026 grand final acts, then compare your top to reality.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon-96.png", sizes: "96x96", type: "image/png" },
+      { url: "/favicon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+  },
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export const viewport: Viewport = {
+  themeColor: "#000c54",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+}
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const lang = await getLang()
   return (
-    <html lang="en" className={`${sora.variable} ${inter.variable}`}>
-      <body>{children}</body>
+    <html lang={lang} className={`${sora.variable} ${inter.variable}`}>
+      <body>
+        <GlobalLangToggle current={lang} />
+        {children}
+      </body>
     </html>
   )
 }

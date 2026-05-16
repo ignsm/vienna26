@@ -19,23 +19,41 @@
   --radius-card: 16px;
 }
 
-html,
+html {
+  background: var(--mid-blue);
+}
+
 body {
   min-height: 100dvh;
   color: var(--white);
   font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  background:
-    radial-gradient(
-      120% 150% at 90% -3%,
-      var(--indigo),
-      var(--deep-blue) 22.49%,
-      var(--mid-blue) 33.26% 64.14%,
-      var(--purple) 85.82%,
-      var(--hotpink)
-    )
-    0 0 / cover fixed;
   -webkit-font-smoothing: antialiased;
+  background: radial-gradient(
+    120% 150% at 90% -3%,
+    #20f,
+    #000c54 22.49%,
+    #010a41 33.26% 64.14%,
+    #4c0a54 85.82%,
+    #ff0178
+  ) 0 0 / cover fixed;
+}
+
+@layer utilities {
+  .safe-x {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+  .safe-x-tight {
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.75rem, env(safe-area-inset-right));
+  }
+  .safe-pb {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+  .safe-pt {
+    padding-top: max(0.5rem, env(safe-area-inset-top));
+  }
 }
 
 @layer components {
@@ -75,4 +93,12 @@ body {
 html,
 body {
   overscroll-behavior-y: none;
+}
+
+@keyframes pulse-soft {
+  0%, 100% { box-shadow: 0 10px 25px -5px rgba(255, 23, 112, 0.4); }
+  50%      { box-shadow: 0 10px 35px 0  rgba(255, 23, 112, 0.7); }
+}
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
 }
