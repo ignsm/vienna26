@@ -1,21 +1,45 @@
 "use server"
 
 import { db, rooms, voters } from "@/lib/db"
-import { eq, and } from "drizzle-orm"
+import { eq, and, sql } from "drizzle-orm"
 import { redirect } from "next/navigation"
 import { z } from "zod"
 import { newRoomCode, newToken } from "@/lib/codes"
 import { setHostCookie, setVoterCookie, getVoterToken } from "@/lib/auth"
+import { rateLimit, getClientIp } from "@/lib/ratelimit"
 
 const NameSchema = z.string().trim().min(1).max(32)
 const RoomNameSchema = z.string().trim().min(1).max(48).optional()
 const CodeSchema = z.string().trim().toUpperCase().regex(/^[A-Z0-9]{3,8}$/)
+
+// Hard caps so a script kiddie can't fill Neon's free tier by spamming /create.
+// Override via env if a real viral moment hits; on Vercel set VIENNA26_ROOM_CAP
+// and redeploy. Defaults below are tuned to free-tier headroom (~500 active
+// rooms during the show consumes most of Neon's monthly compute hours).
+const GLOBAL_ROOM_CAP = Number(process.env.VIENNA26_ROOM_CAP ?? 5000)
+const ROOM_VOTER_CAP = Number(process.env.VIENNA26_VOTER_CAP ?? 100)
+
+async function checkRoomCap() {
+  const [{ c }] = await db.select({ c: sql<number>`count(*)::int` }).from(rooms)
+  if (c >= GLOBAL_ROOM_CAP) throw new Error("ROOM_CAP_REACHED")
+}
+
+async function checkVoterCap(code: string) {
+  const [{ c }] = await db
+    .select({ c: sql<number>`count(*)::int` })
+    .from(voters)
+    .where(eq(voters.roomCode, code))
+  if (c >= ROOM_VOTER_CAP) throw new Error("ROOM_FULL")
+}
 
 /**
  * One-click solo room for users without a party. Reuses the same room/voter
  * infrastructure so all features (save, share, vs-reality) work identically.
  */
 export async function createSoloRoom() {
+  await rateLimit("createRoom", await getClientIp())
+  await checkRoomCap()
+
   const hostName = "You"
 
   let code = newRoomCode()
@@ -38,6 +62,9 @@ export async function createSoloRoom() {
 }
 
 export async function createRoom(formData: FormData) {
+  await rateLimit("createRoom", await getClientIp())
+  await checkRoomCap()
+
   const hostName = NameSchema.parse(formData.get("name"))
   const rawRoomName = formData.get("roomName")
   const roomName = RoomNameSchema.parse(
@@ -64,6 +91,12 @@ export async function createRoom(formData: FormData) {
 }
 
 export async function joinRoom(formData: FormData) {
+  try {
+    await rateLimit("joinRoom", await getClientIp())
+  } catch {
+    redirect(`/join?error=rate_limited`)
+  }
+
   let code: string
   let displayName: string
   try {
@@ -101,6 +134,8 @@ export async function joinRoom(formData: FormData) {
     while (taken.has(`${displayName} (${n})`.toLowerCase())) n += 1
     finalName = `${displayName} (${n})`
   }
+
+  await checkVoterCap(code)
 
   const token = newToken()
   await db.insert(voters).values({ roomCode: code, token, displayName: finalName })

@@ -1,4 +1,4 @@
-import { pgTable, text, integer, timestamp, jsonb, uuid, uniqueIndex, smallint } from "drizzle-orm/pg-core"
+import { pgTable, text, integer, timestamp, jsonb, uuid, uniqueIndex, smallint, bigserial, index } from "drizzle-orm/pg-core"
 
 /**
  *  rooms
@@ -66,6 +66,22 @@ export const douze = pgTable(
   (t) => ({
     voterContestantIdx: uniqueIndex("douze_voter_contestant_idx").on(t.voterId, t.contestantId),
     voterPointsIdx: uniqueIndex("douze_voter_points_idx").on(t.voterId, t.points),
+  }),
+)
+
+/**
+ * Lightweight in-DB rate limit log. One row per protected action invocation.
+ * Periodic cleanup keeps the table bounded.
+ */
+export const ratelimitEvents = pgTable(
+  "ratelimit_events",
+  {
+    id: bigserial("id", { mode: "number" }).primaryKey(),
+    key: text("key").notNull(), // e.g. "createRoom:1.2.3.4"
+    occurredAt: timestamp("occurred_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => ({
+    keyTimeIdx: index("ratelimit_key_time_idx").on(t.key, t.occurredAt),
   }),
 )
 

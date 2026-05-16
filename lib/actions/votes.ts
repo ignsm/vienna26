@@ -6,6 +6,7 @@ import { z } from "zod"
 import { getVoterToken } from "@/lib/auth"
 import { DOUZE_POINTS } from "@/lib/db/schema"
 import { CONTESTANTS } from "@/lib/contestants"
+import { rateLimit } from "@/lib/ratelimit"
 import { revalidatePath } from "next/cache"
 
 const Score = z.number().int().min(0).max(10)
@@ -38,6 +39,7 @@ export async function castVote(input: {
   const hotness = Score.parse(input.hotness)
 
   const voter = await requireVoter(code)
+  await rateLimit("castVote", voter.id)
 
   await db
     .insert(votes)
@@ -98,6 +100,7 @@ export async function submitDouze(input: { roomCode: string; picks: { contestant
   if (room.length === 0) throw new Error("ROOM_NOT_FOUND")
 
   const voter = await requireVoter(code)
+  await rateLimit("submitDouze", voter.id)
 
   await db.transaction(async (tx) => {
     await tx.delete(douze).where(eq(douze.voterId, voter.id))

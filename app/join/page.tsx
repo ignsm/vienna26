@@ -19,7 +19,11 @@ export default async function JoinRoomPage({
         ? lang === "ru"
           ? "Неверный формат кода или имени."
           : "Invalid code or name format."
-        : null
+        : sp.error === "rate_limited"
+          ? lang === "ru"
+            ? "Слишком много попыток, подожди минуту."
+            : "Too many attempts — wait a minute."
+          : null
 
   return (
     <main className="min-h-dvh flex flex-col items-center justify-center p-6">
