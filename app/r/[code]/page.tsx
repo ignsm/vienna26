@@ -55,9 +55,7 @@ export default async function RoomPage({ params }: { params: Promise<{ code: str
       <section className="px-4 pb-32 pt-4 max-w-2xl mx-auto">
         <RoundBanner
           roomCode={code}
-          isHost={isHost}
-          douzeOpen={room[0].douzeOpen === 1}
-          mySubmitted={myDouze.length === 10}
+          mySubmittedDouze={myDouze.length === 10}
           myVotesCount={myVotes.length}
           totalActs={CONTESTANTS.length}
           lang={lang}

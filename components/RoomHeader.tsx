@@ -66,6 +66,9 @@ export function RoomHeader({ roomCode, roomName, meId, meName, voters, isHost, d
         <Link href={`/r/${roomCode}/results`} className="pill bg-white/10 hover:bg-white/20 text-white px-3 py-1.5">
           Leaderboard
         </Link>
+        <Link href={`/r/${roomCode}/douze`} className="pill bg-white/10 hover:bg-white/20 text-white px-3 py-1.5">
+          12 points
+        </Link>
 
         {realResultsReady && (
           <Link href={`/r/${roomCode}/vs-reality`} className="pill bg-[color:var(--gold)] text-black px-3 py-1.5 font-medium">

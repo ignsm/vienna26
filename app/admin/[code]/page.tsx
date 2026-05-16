@@ -3,7 +3,6 @@ import { eq } from "drizzle-orm"
 import { notFound, redirect } from "next/navigation"
 import { getHostToken } from "@/lib/auth"
 import { getT } from "@/lib/i18n/server"
-import { openDouzeRound } from "@/lib/actions/rooms"
 import { saveRealResults } from "@/lib/actions/admin"
 import { CONTESTANTS } from "@/lib/contestants"
 import Link from "next/link"
@@ -37,22 +36,6 @@ export default async function AdminPage({ params }: { params: Promise<{ code: st
           <h1 className="headline-display text-4xl">{t("admin.title")}</h1>
           <p className="text-white/60 text-sm">Host-only controls.</p>
         </div>
-
-        <section className="card-glass space-y-4">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="headline-lg text-xl text-white">12-point round</h2>
-            {room[0].douzeOpen === 1 ? (
-              <span className="pill bg-[color:var(--gold)] text-black text-xs px-3 py-1.5">{t("admin.douze_open")}</span>
-            ) : (
-              <form action={async () => { "use server"; await openDouzeRound(code) }}>
-                <button className="pill-pink text-sm px-4 py-2">{t("admin.open_douze")}</button>
-              </form>
-            )}
-          </div>
-          <p className="text-white/60 text-xs">
-            Opens the 12/10/8/.../1 distribution screen for every juror. Do this once everyone has rated all acts.
-          </p>
-        </section>
 
         <section className="card-glass space-y-4">
           <h2 className="headline-lg text-xl text-white">{t("admin.title")}</h2>

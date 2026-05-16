@@ -93,10 +93,9 @@ export async function submitDouze(input: { roomCode: string; picks: { contestant
     if (!pointSet.has(p)) throw new Error("INCOMPLETE_POINTS")
   }
 
-  // Host must have opened the round.
+  // Room must exist; douze round is always open (independent of per-act scoring).
   const room = await db.select().from(rooms).where(eq(rooms.code, code)).limit(1)
   if (room.length === 0) throw new Error("ROOM_NOT_FOUND")
-  if (room[0].douzeOpen !== 1) throw new Error("DOUZE_NOT_OPEN")
 
   const voter = await requireVoter(code)
 

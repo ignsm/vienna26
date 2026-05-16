@@ -15,7 +15,6 @@ type Props = {
 const POINTS = [...DOUZE_POINTS] // [12, 10, 8, 7, 6, 5, 4, 3, 2, 1]
 
 export function DouzePicker({ roomCode, contestants, initialPicks }: Props) {
-  // Reconstruct initial ordering: slot i (0..9) holds the contestant who got POINTS[i].
   const initialOrder: (number | null)[] = POINTS.map((p) => {
     const found = initialPicks.find((pk) => pk.points === p)
     return found ? found.contestantId : null
@@ -30,12 +29,12 @@ export function DouzePicker({ roomCode, contestants, initialPicks }: Props) {
   const picked = new Set(filled)
   const nextEmpty = order.findIndex((x) => x === null)
   const complete = nextEmpty === -1
+  const remaining = order.filter((x) => x === null).length
 
   const onPickContestant = (id: number) => {
     setSubmitted(false)
     setError(null)
     if (picked.has(id)) {
-      // Remove and shift remaining picks up to fill the gap.
       const removedIdx = order.findIndex((x) => x === id)
       const next = [...order]
       next.splice(removedIdx, 1)
@@ -43,7 +42,7 @@ export function DouzePicker({ roomCode, contestants, initialPicks }: Props) {
       setOrder(next)
       return
     }
-    if (nextEmpty === -1) return // already full
+    if (nextEmpty === -1) return
     const next = [...order]
     next[nextEmpty] = id
     setOrder(next)
@@ -79,22 +78,37 @@ export function DouzePicker({ roomCode, contestants, initialPicks }: Props) {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Slots */}
-      <section className="card-light space-y-2">
+    <div className="space-y-5">
+      {/* Your picks: 10 slots, gold for 12 */}
+      <section className="card-light !p-4 space-y-1.5">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="font-bold text-black/80 text-sm uppercase tracking-widest">Your picks</h2>
+          {filled.length > 0 && (
+            <button onClick={onReset} className="text-black/40 hover:text-black/80 text-xs underline underline-offset-2">
+              Reset
+            </button>
+          )}
+        </div>
         {POINTS.map((p, i) => {
           const id = order[i]
           const c = id ? contestants.find((x) => x.id === id) : null
+          const isTwelve = p === 12
           return (
             <div
               key={p}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2 ${
-                p === 12 ? "bg-[color:var(--gold)]/20" : i % 2 ? "bg-black/[0.03]" : "bg-transparent"
+              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 transition ${
+                isTwelve
+                  ? "bg-gradient-to-r from-[color:var(--gold)]/30 to-[color:var(--gold)]/10 border border-[color:var(--gold)]/50"
+                  : c
+                    ? "bg-black/5"
+                    : "bg-black/[0.02] border border-dashed border-black/15"
               }`}
             >
               <span
-                className={`shrink-0 w-9 h-9 rounded-full flex items-center justify-center font-bold ${
-                  p === 12 ? "bg-[color:var(--gold)] text-black" : "bg-black text-white"
+                className={`shrink-0 rounded-full flex items-center justify-center font-bold tabular-nums ${
+                  isTwelve
+                    ? "w-12 h-12 bg-[color:var(--gold)] text-black text-xl shadow-md shadow-[color:var(--gold)]/40"
+                    : "w-10 h-10 bg-black text-white text-base"
                 }`}
               >
                 {p}
@@ -103,74 +117,77 @@ export function DouzePicker({ roomCode, contestants, initialPicks }: Props) {
                 <>
                   <span className="text-2xl shrink-0">{c.flag}</span>
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium text-black truncate">{c.country}</div>
-                    <div className="text-xs text-black/60 truncate">
+                    <div className={`font-medium truncate ${isTwelve ? "text-black text-base" : "text-black/80 text-sm"}`}>
+                      {c.country}
+                    </div>
+                    <div className="text-xs text-black/55 truncate">
                       {c.artist} · <em>{c.song}</em>
                     </div>
                   </div>
                   <button
                     onClick={() => onClearSlot(i)}
-                    className="text-black/40 hover:text-black/80 text-sm px-2"
+                    className="text-black/35 hover:text-black/80 text-base px-2 shrink-0"
                     aria-label="Clear slot"
                   >
                     ✕
                   </button>
                 </>
               ) : (
-                <span className="text-black/30 text-sm">— empty —</span>
+                <span className="text-black/30 text-xs italic">
+                  {isTwelve ? "tap your favourite below ↓" : "—"}
+                </span>
               )}
             </div>
           )
         })}
       </section>
 
-      <div className="flex items-center gap-3">
-        <span className="text-white/70 text-sm">
-          Remaining: <span className="font-mono">{order.filter((x) => x === null).length} / 10</span>
-        </span>
-        <button onClick={onReset} className="ml-auto pill bg-white/10 hover:bg-white/20 text-white text-xs px-3 py-1.5">
-          Reset
-        </button>
-      </div>
-
       {/* Contestant grid */}
-      <section className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-        {contestants.map((c) => {
-          const idx = order.findIndex((x) => x === c.id)
-          const pickedHere = idx !== -1
-          return (
-            <button
-              key={c.id}
-              onClick={() => onPickContestant(c.id)}
-              disabled={!pickedHere && nextEmpty === -1}
-              className={`text-left rounded-xl p-3 transition border ${
-                pickedHere
-                  ? "bg-[color:var(--pink)] border-[color:var(--pink)] text-white"
-                  : "bg-white text-black border-transparent hover:border-[color:var(--pink)]/40 disabled:opacity-40"
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">{c.flag}</span>
-                <span className="text-sm font-medium truncate">{c.country}</span>
-                {pickedHere && (
-                  <span className="ml-auto font-bold text-xs bg-white/20 rounded px-1.5 py-0.5">{POINTS[idx]}</span>
+      <section>
+        <h2 className="text-white/60 text-xs uppercase tracking-widest mb-2">
+          {remaining > 0
+            ? `Pick ${remaining} more (tap a country)`
+            : "All 10 picked. Tap to swap or submit below."}
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {contestants.map((c) => {
+            const idx = order.findIndex((x) => x === c.id)
+            const pickedHere = idx !== -1
+            const points = pickedHere ? POINTS[idx] : null
+            return (
+              <button
+                key={c.id}
+                onClick={() => onPickContestant(c.id)}
+                disabled={!pickedHere && nextEmpty === -1}
+                className={`relative text-left rounded-xl p-3 transition border ${
+                  pickedHere
+                    ? points === 12
+                      ? "bg-[color:var(--gold)] border-[color:var(--gold)] text-black"
+                      : "bg-[color:var(--pink)] border-[color:var(--pink)] text-white"
+                    : "bg-white text-black border-transparent hover:border-[color:var(--pink)]/40 disabled:opacity-40"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">{c.flag}</span>
+                  <span className="text-sm font-medium truncate">{c.country}</span>
+                </div>
+                <div className={`text-xs mt-1 truncate ${pickedHere ? "opacity-85" : "text-black/50"}`}>{c.artist}</div>
+                {points !== null && (
+                  <span
+                    className={`absolute -top-1.5 -right-1.5 w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs ring-2 ring-black/40 ${
+                      points === 12 ? "bg-black text-[color:var(--gold)]" : "bg-white text-[color:var(--pink)]"
+                    }`}
+                  >
+                    {points}
+                  </span>
                 )}
-              </div>
-              <div className={`text-xs mt-1 truncate ${pickedHere ? "text-white/80" : "text-black/50"}`}>{c.artist}</div>
-            </button>
-          )
-        })}
+              </button>
+            )
+          })}
+        </div>
       </section>
 
       {error && <p className="text-red-300 text-sm">{error}</p>}
-
-      <button
-        onClick={onSubmit}
-        disabled={!complete || pending}
-        className="pill-pink w-full py-4 text-base disabled:opacity-40"
-      >
-        {pending ? "Saving…" : complete ? "Submit douze" : `Pick ${order.filter((x) => x === null).length} more`}
-      </button>
 
       {submitted && (
         <Link
@@ -178,9 +195,32 @@ export function DouzePicker({ roomCode, contestants, initialPicks }: Props) {
           className="block text-center rounded-2xl border border-[color:var(--gold)]/40 bg-[color:var(--gold)]/15 hover:bg-[color:var(--gold)]/25 transition px-5 py-4"
         >
           <p className="text-[color:var(--gold)] font-bold">✓ Submitted · see leaderboard →</p>
-          <p className="text-white/70 text-xs mt-1">Waiting on the rest of the jury.</p>
+          <p className="text-white/70 text-xs mt-1">Your 12 points are in the room totals.</p>
         </Link>
       )}
+
+      {/* Sticky submit footer — always visible while scrolling the grid */}
+      <div className="fixed bottom-0 left-0 right-0 z-20 px-4 pb-4 pt-3 bg-gradient-to-t from-[#000c54] via-[#000c54]/90 to-transparent pointer-events-none">
+        <div className="max-w-2xl mx-auto pointer-events-auto">
+          <button
+            onClick={onSubmit}
+            disabled={!complete || pending}
+            className={`w-full py-4 rounded-pill text-base font-bold transition shadow-lg ${
+              complete
+                ? "bg-[color:var(--pink)] text-white hover:brightness-110 shadow-[color:var(--pink)]/40"
+                : "bg-white/20 text-white/60 cursor-not-allowed"
+            }`}
+          >
+            {pending
+              ? "Saving…"
+              : submitted
+                ? "Update submission"
+                : complete
+                  ? "Submit 12 points"
+                  : `Pick ${remaining} more`}
+          </button>
+        </div>
+      </div>
     </div>
   )
 }

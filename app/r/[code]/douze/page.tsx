@@ -31,31 +31,28 @@ export default async function DouzePage({ params }: { params: Promise<{ code: st
   const { t } = await getT()
 
   return (
-    <main className="min-h-dvh p-4">
-      <div className="max-w-2xl mx-auto space-y-6">
-        <header className="flex items-center justify-between gap-2">
-          <Link href={`/r/${code}`} className="text-white/70 hover:text-white text-sm">
-            ← vienna<span className="text-[color:var(--pink)]">26</span> · {code}
+    <main className="min-h-dvh">
+      <header className="sticky top-0 z-30 backdrop-blur-md bg-black/40 border-b border-white/10">
+        <div className="px-4 py-3 max-w-2xl mx-auto flex items-center gap-3">
+          <Link href={`/r/${code}`} className="text-white/70 hover:text-white text-sm shrink-0">
+            ← vienna<span className="text-[color:var(--pink)]">26</span>
           </Link>
-        </header>
+          <span className="font-mono text-base tracking-widest text-white/80 ml-auto">{code}</span>
+        </div>
+      </header>
 
-        <div className="space-y-1">
-          <h1 className="headline-display text-4xl">{t("douze.title")}</h1>
-          <p className="text-white/60 text-sm">{t("douze.hint")}</p>
+      <section className="p-4 pb-40 max-w-2xl mx-auto space-y-5">
+        <div className="space-y-1.5">
+          <h1 className="headline-display text-4xl md:text-5xl">{t("douze.title")}</h1>
+          <p className="text-white/70 text-sm">{t("douze.hint")}</p>
         </div>
 
-        {room[0].douzeOpen !== 1 ? (
-          <div className="card-glass">
-            <p className="text-[color:var(--gold)]">{t("room.douze_locked")}</p>
-          </div>
-        ) : (
-          <DouzePicker
-            roomCode={code}
-            contestants={CONTESTANTS}
-            initialPicks={myDouze.map((d) => ({ contestantId: d.contestantId, points: d.points }))}
-          />
-        )}
-      </div>
+        <DouzePicker
+          roomCode={code}
+          contestants={CONTESTANTS}
+          initialPicks={myDouze.map((d) => ({ contestantId: d.contestantId, points: d.points }))}
+        />
+      </section>
     </main>
   )
 }
