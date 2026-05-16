@@ -39,6 +39,14 @@ const AXIS_LABELS_RU: Record<Axis, string> = {
   hotness: "Секс.",
 }
 
+const EMOJI_BUCKETS: { emoji: string; value: number; labelEn: string; labelRu: string }[] = [
+  { emoji: "💀", value: 2, labelEn: "Nope", labelRu: "Мимо" },
+  { emoji: "😐", value: 4, labelEn: "Meh", labelRu: "Так себе" },
+  { emoji: "🙂", value: 6, labelEn: "Good", labelRu: "Норм" },
+  { emoji: "🤩", value: 8, labelEn: "Great", labelRu: "Огонь" },
+  { emoji: "🔥", value: 10, labelEn: "Iconic", labelRu: "Икона" },
+]
+
 const lsKey = (room: string, id: number) => `v26:${room}:${id}`
 const lsCursorKey = (room: string) => `v26:${room}:cursor`
 
@@ -108,7 +116,6 @@ export function VoteList({ roomCode, contestants, initialVotes }: Props) {
   const currentVote = votes[current.id] ?? {}
   const isCurrentDone = AXES.every((a) => currentVote[a] !== undefined)
 
-  // Auto-advance timer (cleaned up on cursor change or new tap).
   const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => {
     return () => {
@@ -152,12 +159,11 @@ export function VoteList({ roomCode, contestants, initialVotes }: Props) {
       } catch {}
       syncToServer(current.id, nextVote)
 
-      // Auto-advance unless we're tweaking the breakdown.
       if (!tweakOpen) {
         if (advanceTimer.current) clearTimeout(advanceTimer.current)
         advanceTimer.current = setTimeout(() => {
           setCursor((c) => Math.min(contestants.length - 1, c + 1))
-        }, 400)
+        }, 450)
       }
     },
     [current.id, roomCode, syncToServer, tweakOpen, contestants.length],
@@ -175,7 +181,6 @@ export function VoteList({ roomCode, contestants, initialVotes }: Props) {
     [current.id, currentVote, roomCode, syncToServer],
   )
 
-  // Offline → online retry.
   const lastOnlineRef = useRef(online)
   useEffect(() => {
     if (online && !lastOnlineRef.current) {
@@ -206,7 +211,7 @@ export function VoteList({ roomCode, contestants, initialVotes }: Props) {
     return v ? AXES.every((a) => v[a] !== undefined) : false
   }
 
-  // The "primary" displayed value is the average of the 4 axes (or undefined if not all set).
+  // Primary "feel" — the bucket that matches the current avg if all axes equal.
   const primaryDisplay =
     currentVote.vocal !== undefined &&
     currentVote.performance !== undefined &&
@@ -222,7 +227,7 @@ export function VoteList({ roomCode, contestants, initialVotes }: Props) {
   const goNext = () => setCursor((c) => Math.min(contestants.length - 1, c + 1))
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {!online && (
         <div className="text-center text-xs text-[color:var(--gold)] bg-black/40 rounded-pill px-3 py-1.5">
           offline — saving locally, will sync
@@ -230,48 +235,61 @@ export function VoteList({ roomCode, contestants, initialVotes }: Props) {
       )}
 
       <article className="card-light shadow-2xl">
-        <div className="flex items-start gap-4 mb-6">
-          <span className="text-6xl leading-none" aria-hidden>
+        <div className="flex items-start gap-3 mb-5">
+          <span className="text-5xl leading-none shrink-0" aria-hidden>
             {current.flag}
           </span>
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-black/50 uppercase tracking-widest">
-              {String(current.id).padStart(2, "0")} / {String(contestants.length).padStart(2, "0")} ·{" "}
-              {current.country}
+            <p className="text-[11px] text-black/50 uppercase tracking-widest">
+              {String(current.id).padStart(2, "0")} / {String(contestants.length).padStart(2, "0")} · {current.country}
             </p>
-            <h3 className="headline-lg text-2xl mt-1 leading-tight">{current.artist}</h3>
-            <p className="italic text-black/60 text-sm">{current.song}</p>
+            <h3 className="headline-lg text-xl mt-0.5 leading-tight">{current.artist}</h3>
+            <p className="italic text-black/55 text-sm">{current.song}</p>
           </div>
-          {isCurrentDone && <span className="pill bg-[color:var(--pink)] text-white text-xs px-3 py-1">✓</span>}
+          {isCurrentDone && (
+            <span className="rounded-full bg-[color:var(--pink)] text-white text-xs px-2 py-0.5 shrink-0 font-bold">✓</span>
+          )}
         </div>
 
-        {/* Big primary row — one tap per song. */}
-        <div className="grid grid-cols-11 gap-1.5">
-          {Array.from({ length: 11 }, (_, i) => (
-            <button
-              key={i}
-              onClick={() => setPrimary(i)}
-              className={`aspect-square rounded-lg text-lg font-bold transition ${
-                primaryDisplay === i
-                  ? "bg-[color:var(--pink)] text-white scale-110 shadow-lg"
-                  : "bg-black/5 hover:bg-black/10 text-black/80 active:scale-95"
-              }`}
-              aria-label={`Score ${i}`}
-            >
-              {i}
-            </button>
-          ))}
+        {/* Primary feel — 5 large emoji buckets */}
+        <div className="grid grid-cols-5 gap-2">
+          {EMOJI_BUCKETS.map((b) => {
+            const isSelected = primaryDisplay === b.value
+            return (
+              <button
+                key={b.value}
+                onClick={() => setPrimary(b.value)}
+                className={`flex flex-col items-center justify-center gap-0.5 aspect-square rounded-2xl transition active:scale-95 ${
+                  isSelected
+                    ? "bg-[color:var(--pink)] text-white shadow-lg shadow-[color:var(--pink)]/40 scale-105"
+                    : "bg-black/[0.04] hover:bg-black/[0.08]"
+                }`}
+                aria-label={`Score ${b.value}`}
+              >
+                <span className="text-3xl leading-none">{b.emoji}</span>
+                <span className={`text-[10px] font-bold uppercase tracking-wide leading-none ${isSelected ? "text-white" : "text-black/55"}`}>
+                  {lang === "ru" ? b.labelRu : b.labelEn}
+                </span>
+              </button>
+            )
+          })}
         </div>
 
         <button
           onClick={() => setTweakOpen((v) => !v)}
-          className="mt-4 text-xs text-black/50 hover:text-black/80 underline underline-offset-2"
+          className="mt-3 text-[11px] text-black/45 hover:text-black/75 underline underline-offset-2"
         >
-          {tweakOpen ? "▾ collapse" : "▸ tweak axes"}
+          {tweakOpen
+            ? lang === "ru"
+              ? "▾ свернуть"
+              : "▾ collapse"
+            : lang === "ru"
+              ? "▸ оценить детально"
+              : "▸ rate axes individually"}
         </button>
 
         {tweakOpen && (
-          <div className="mt-3 space-y-3">
+          <div className="mt-3 space-y-2.5">
             {AXES.map((axis) => (
               <AxisRow
                 key={axis}
@@ -284,12 +302,13 @@ export function VoteList({ roomCode, contestants, initialVotes }: Props) {
         )}
       </article>
 
-      {/* Pagination strip */}
+      {/* Pagination */}
       <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2">
         <button
           onClick={goPrev}
           disabled={cursor === 0}
-          className="pill bg-white/10 hover:bg-white/20 text-white disabled:opacity-30 px-4 py-3 text-lg"
+          className="rounded-full bg-white/10 hover:bg-white/20 text-white disabled:opacity-30 w-11 h-11 flex items-center justify-center text-lg"
+          aria-label="Previous"
         >
           ←
         </button>
@@ -298,9 +317,9 @@ export function VoteList({ roomCode, contestants, initialVotes }: Props) {
             <button
               key={c.id}
               onClick={() => setCursor(i)}
-              className={`shrink-0 snap-center w-7 h-7 rounded-full text-xs font-mono transition ${
+              className={`shrink-0 snap-center w-7 h-7 rounded-full text-[11px] font-mono transition ${
                 i === cursor
-                  ? "bg-white text-black ring-2 ring-[color:var(--pink)]"
+                  ? "bg-white text-black ring-2 ring-[color:var(--pink)] font-bold"
                   : isDone(c.id)
                     ? "bg-[color:var(--pink)]/80 text-white"
                     : "bg-white/15 text-white/70 hover:bg-white/25"
@@ -314,7 +333,8 @@ export function VoteList({ roomCode, contestants, initialVotes }: Props) {
         <button
           onClick={goNext}
           disabled={cursor === contestants.length - 1}
-          className="pill bg-white/10 hover:bg-white/20 text-white disabled:opacity-30 px-4 py-3 text-lg"
+          className="rounded-full bg-white/10 hover:bg-white/20 text-white disabled:opacity-30 w-11 h-11 flex items-center justify-center text-lg"
+          aria-label="Next"
         >
           →
         </button>
@@ -334,25 +354,23 @@ function AxisRow({
 }) {
   return (
     <div>
-      <div className="flex items-center justify-between mb-1.5">
+      <div className="flex items-center justify-between mb-1">
         <span className="text-xs font-medium text-black/70">{label}</span>
-        <span className="text-xs font-mono tabular-nums w-6 text-right">
-          {value === undefined ? "·" : value}
-        </span>
+        <span className="text-xs font-mono tabular-nums w-6 text-right">{value === undefined ? "·" : value}</span>
       </div>
-      <div className="grid grid-cols-11 gap-1">
-        {Array.from({ length: 11 }, (_, i) => (
+      <div className="grid grid-cols-5 gap-1">
+        {EMOJI_BUCKETS.map((b) => (
           <button
-            key={i}
-            onClick={() => onSelect(i)}
-            className={`aspect-square rounded text-xs font-medium transition ${
-              value === i
+            key={b.value}
+            onClick={() => onSelect(b.value)}
+            className={`h-9 rounded-lg text-xs font-medium transition flex items-center justify-center gap-1 ${
+              value === b.value
                 ? "bg-[color:var(--pink)] text-white"
-                : "bg-black/5 hover:bg-black/10 text-black/70"
+                : "bg-black/[0.04] hover:bg-black/[0.08] text-black/65"
             }`}
-            aria-label={`${label} ${i}`}
+            aria-label={`${label} ${b.value}`}
           >
-            {i}
+            <span className="text-base leading-none">{b.emoji}</span>
           </button>
         ))}
       </div>
