@@ -12,6 +12,7 @@
     "test": "node --import tsx --test test/*.test.ts"
   },
   "dependencies": {
+    "cmdk": "^1.1.1",
     "drizzle-orm": "^0.36.4",
     "motion": "^11.13.5",
     "nanoid": "^5.0.9",
