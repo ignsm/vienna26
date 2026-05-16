@@ -64,12 +64,19 @@ export async function createRoom(formData: FormData) {
 }
 
 export async function joinRoom(formData: FormData) {
-  const code = CodeSchema.parse(formData.get("code"))
-  const displayName = NameSchema.parse(formData.get("name"))
+  let code: string
+  let displayName: string
+  try {
+    code = CodeSchema.parse(formData.get("code"))
+    displayName = NameSchema.parse(formData.get("name"))
+  } catch {
+    // Invalid input — send back to /join with a friendly error param.
+    redirect(`/join?error=invalid`)
+  }
 
   const room = await db.select().from(rooms).where(eq(rooms.code, code)).limit(1)
   if (room.length === 0) {
-    throw new Error("ROOM_NOT_FOUND")
+    redirect(`/join?error=not_found&code=${code}`)
   }
 
   // If we already have a voter for this room, just refresh the cookie.
@@ -82,8 +89,21 @@ export async function joinRoom(formData: FormData) {
     }
   }
 
+  // Dedupe display name within the room — append (2), (3), ...
+  const existingNames = await db
+    .select({ displayName: voters.displayName })
+    .from(voters)
+    .where(eq(voters.roomCode, code))
+  const taken = new Set(existingNames.map((v) => v.displayName.toLowerCase()))
+  let finalName = displayName
+  if (taken.has(finalName.toLowerCase())) {
+    let n = 2
+    while (taken.has(`${displayName} (${n})`.toLowerCase())) n += 1
+    finalName = `${displayName} (${n})`
+  }
+
   const token = newToken()
-  await db.insert(voters).values({ roomCode: code, token, displayName })
+  await db.insert(voters).values({ roomCode: code, token, displayName: finalName })
   await setVoterCookie(code, token)
   redirect(`/r/${code}`)
 }

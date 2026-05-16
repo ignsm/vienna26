@@ -2,10 +2,24 @@ import Link from "next/link"
 import { joinRoom } from "@/lib/actions/rooms"
 import { getT } from "@/lib/i18n/server"
 
-export default async function JoinRoomPage({ searchParams }: { searchParams: Promise<{ code?: string }> }) {
-  const { t } = await getT()
+export default async function JoinRoomPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ code?: string; error?: string }>
+}) {
+  const { lang, t } = await getT()
   const sp = await searchParams
   const presetCode = sp.code?.toUpperCase() ?? ""
+  const errorMsg =
+    sp.error === "not_found"
+      ? lang === "ru"
+        ? `Комната ${sp.code ?? ""} не найдена. Проверь код.`
+        : `Room ${sp.code ?? ""} not found. Check the code.`
+      : sp.error === "invalid"
+        ? lang === "ru"
+          ? "Неверный формат кода или имени."
+          : "Invalid code or name format."
+        : null
 
   return (
     <main className="min-h-dvh flex flex-col items-center justify-center p-6">
@@ -14,6 +28,12 @@ export default async function JoinRoomPage({ searchParams }: { searchParams: Pro
           <h1 className="headline-lg text-3xl text-white">{t("join.title")}</h1>
           <p className="text-white/70 text-sm">{t("join.hint")}</p>
         </div>
+
+        {errorMsg && (
+          <div className="rounded-xl bg-red-500/15 border border-red-400/30 text-red-200 text-sm px-3 py-2">
+            {errorMsg}
+          </div>
+        )}
 
         <form action={joinRoom} className="space-y-4">
           <label className="block space-y-2">
