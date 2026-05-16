@@ -3,11 +3,12 @@ import { eq, and } from "drizzle-orm"
 import { notFound, redirect } from "next/navigation"
 import { getVoterToken, getHostToken } from "@/lib/auth"
 import { getT } from "@/lib/i18n/server"
-import { CONTESTANTS, getContestant } from "@/lib/contestants"
-import { leaderboard, type Aggregate } from "@/lib/scoring"
+import { CONTESTANTS } from "@/lib/contestants"
+import { leaderboard } from "@/lib/scoring"
 import { PollingRefresh } from "@/components/PollingRefresh"
 import { RoomTabBar } from "@/components/RoomTabBar"
 import { RoomHeader } from "@/components/RoomHeader"
+import { LeaderboardView } from "@/components/LeaderboardView"
 import Link from "next/link"
 
 export const dynamic = "force-dynamic"
@@ -91,31 +92,7 @@ export default async function ResultsPage({ params }: { params: Promise<{ code: 
             </Link>
           </div>
         ) : (
-          <>
-            {/* DRAMATIC TOP-3 */}
-            {top3.length > 0 && <PodiumTop3 rows={top3} />}
-
-            {/* The rest */}
-            {rest.length > 0 && (
-              <section>
-                <h2 className="text-xs uppercase tracking-widest text-white/40 mb-2 px-1">
-                  {lang === "ru" ? "Остальные" : "The rest"}
-                </h2>
-                <BoardList rows={rest} startRank={4} />
-              </section>
-            )}
-
-            <section className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <BonusCard
-                title={t("results.bonus.hotness")}
-                rows={byHotness}
-                metric="hotness"
-                accent="--hotpink"
-              />
-              <BonusCard title={t("results.bonus.vocal")} rows={byVocal} metric="vocal" />
-              <BonusCard title={t("results.bonus.performance")} rows={byPerformance} metric="performance" />
-            </section>
-          </>
+          <LeaderboardView board={board} lang={lang} />
         )}
       </div>
 
@@ -132,122 +109,3 @@ export default async function ResultsPage({ params }: { params: Promise<{ code: 
   )
 }
 
-function PodiumTop3({ rows }: { rows: Aggregate[] }) {
-  return (
-    <section className="space-y-2">
-      {rows.map((r, i) => {
-        const c = getContestant(r.contestantId)
-        if (!c) return null
-        const isWinner = i === 0
-        const place = i + 1
-        return (
-          <article
-            key={r.contestantId}
-            className={`rounded-2xl border transition relative overflow-hidden ${
-              isWinner
-                ? "bg-gradient-to-br from-[color:var(--gold)]/30 via-black/40 to-[color:var(--pink)]/10 border-[color:var(--gold)]/50 shadow-xl shadow-[color:var(--gold)]/10"
-                : place === 2
-                  ? "bg-black/50 border-white/20"
-                  : "bg-black/40 border-white/15"
-            }`}
-          >
-            <div className="p-4 md:p-5 flex items-center gap-4">
-              <div
-                className={`shrink-0 font-display font-bold tabular-nums ${
-                  isWinner ? "text-7xl md:text-8xl text-[color:var(--gold)]" : "text-5xl text-white/50"
-                }`}
-              >
-                {place}
-              </div>
-              <div className="shrink-0 text-5xl md:text-6xl">{c.flag}</div>
-              <div className="flex-1 min-w-0">
-                <div className={`font-bold truncate ${isWinner ? "text-xl md:text-2xl text-white" : "text-lg text-white/95"}`}>
-                  {c.country}
-                </div>
-                <div className="text-white/55 text-sm truncate">
-                  {c.artist} <span className="text-white/40">·</span> <em className="text-white/70">{c.song}</em>
-                </div>
-              </div>
-              <div className="text-right shrink-0">
-                <div
-                  className={`font-mono font-bold tabular-nums ${
-                    isWinner ? "text-4xl md:text-5xl text-white" : "text-2xl text-white/90"
-                  }`}
-                >
-                  {r.total.toFixed(0)}
-                </div>
-                <div className="text-[10px] text-white/40 uppercase tracking-widest">
-                  {r.base.toFixed(1)} × {r.voteCount} + {r.douze}
-                </div>
-              </div>
-            </div>
-          </article>
-        )
-      })}
-    </section>
-  )
-}
-
-function BoardList({ rows, startRank }: { rows: Aggregate[]; startRank: number }) {
-  return (
-    <div className="rounded-2xl bg-black/30 backdrop-blur-sm border border-white/10 overflow-hidden divide-y divide-white/5">
-      {rows.map((r, i) => {
-        const c = getContestant(r.contestantId)
-        if (!c) return null
-        return (
-          <div
-            key={r.contestantId}
-            className="flex items-center gap-3 px-3 py-2.5 hover:bg-white/[0.04] transition"
-          >
-            <span className="text-white/40 font-mono text-sm tabular-nums w-6 text-right">{startRank + i}</span>
-            <span className="text-xl shrink-0">{c.flag}</span>
-            <div className="flex-1 min-w-0">
-              <div className="text-white text-sm font-medium truncate">{c.country}</div>
-              <div className="text-white/45 text-xs truncate">{c.artist}</div>
-            </div>
-            <div className="text-right shrink-0">
-              <div className="text-white text-sm font-mono tabular-nums font-bold">{r.total.toFixed(0)}</div>
-              <div className="text-white/40 text-[10px]">
-                {r.base.toFixed(1)} · {r.voteCount}v · {r.douze}
-              </div>
-            </div>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
-function BonusCard({
-  title,
-  rows,
-  metric,
-  accent,
-}: {
-  title: string
-  rows: Aggregate[]
-  metric: "hotness" | "vocal" | "performance"
-  accent?: string
-}) {
-  return (
-    <div className="rounded-2xl bg-black/30 backdrop-blur-sm border border-white/10 p-4 space-y-2">
-      <p className="text-[11px] uppercase tracking-widest text-white/50" style={accent ? { color: `var(${accent})` } : undefined}>
-        {title}
-      </p>
-      <ol className="space-y-1.5">
-        {rows.map((r, i) => {
-          const c = getContestant(r.contestantId)
-          if (!c) return null
-          return (
-            <li key={r.contestantId} className="text-sm flex items-center gap-2">
-              <span className="text-white/35 font-mono text-xs w-4">{i + 1}</span>
-              <span>{c.flag}</span>
-              <span className="text-white truncate flex-1">{c.country}</span>
-              <span className="text-white/70 font-mono tabular-nums text-xs">{r[metric].toFixed(1)}</span>
-            </li>
-          )
-        })}
-      </ol>
-    </div>
-  )
-}
