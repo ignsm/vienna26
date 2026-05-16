@@ -229,6 +229,28 @@ export function VoteList({ roomCode, contestants, initialVotes }: Props) {
           )}
         </div>
 
+        {/* Mode switcher — segmented control. Outside the rating area so it can't be mis-tapped */}
+        <div className="px-3 pt-3 md:px-4 md:pt-4">
+          <div className="grid grid-cols-2 gap-1 p-1 rounded-full bg-black/[0.06]">
+            <button
+              onClick={() => setTweakOpen(false)}
+              className={`h-9 rounded-full text-xs font-bold transition ${
+                !tweakOpen ? "bg-white text-black shadow" : "text-black/55 hover:text-black/80"
+              }`}
+            >
+              {lang === "ru" ? "В целом" : "Overall"}
+            </button>
+            <button
+              onClick={() => setTweakOpen(true)}
+              className={`h-9 rounded-full text-xs font-bold transition ${
+                tweakOpen ? "bg-white text-black shadow" : "text-black/55 hover:text-black/80"
+              }`}
+            >
+              {lang === "ru" ? "По осям" : "By axis"}
+            </button>
+          </div>
+        </div>
+
         {/* Scoring area — either the 5-bucket primary OR the 4-axis detail view, not both */}
         <div className="p-3 md:p-4 space-y-2">
           {!tweakOpen && (
@@ -276,15 +298,6 @@ export function VoteList({ roomCode, contestants, initialVotes }: Props) {
               ))}
             </div>
           )}
-
-          <button
-            onClick={() => setTweakOpen((v) => !v)}
-            className="mt-3 w-full text-center text-xs text-black/45 hover:text-black/75 underline underline-offset-2 py-1"
-          >
-            {tweakOpen
-              ? lang === "ru" ? "← Назад к общей оценке" : "← Back to overall"
-              : lang === "ru" ? "Оценить отдельно: вокал / шоу / песня / секс" : "Rate axes separately"}
-          </button>
         </div>
       </article>
 
