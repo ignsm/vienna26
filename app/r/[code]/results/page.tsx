@@ -1,5 +1,5 @@
 import { db, rooms, voters, votes, douze } from "@/lib/db"
-import { eq, and } from "drizzle-orm"
+import { eq, and, inArray } from "drizzle-orm"
 import { notFound, redirect } from "next/navigation"
 import { getVoterToken, getHostToken } from "@/lib/auth"
 import { getT } from "@/lib/i18n/server"
@@ -31,17 +31,22 @@ export default async function ResultsPage({ params }: { params: Promise<{ code: 
   if (me.length === 0) redirect(`/join?code=${code}`)
 
   const allVoters = await db.select().from(voters).where(eq(voters.roomCode, code))
-  const voterIds = new Set(allVoters.map((v) => v.id))
+  const voterIdList = allVoters.map((v) => v.id)
   const hostToken = await getHostToken(code)
   const isHost = hostToken === room[0].hostToken
 
-  const allVotes = await db.select().from(votes)
-  const allDouze = await db.select().from(douze)
+  // Scope to this room's voters only — never full-scan the votes/douze tables.
+  const roomVotes = voterIdList.length
+    ? await db.select().from(votes).where(inArray(votes.voterId, voterIdList))
+    : []
+  const roomDouze = voterIdList.length
+    ? await db.select().from(douze).where(inArray(douze.voterId, voterIdList))
+    : []
 
-  const myVotes = allVotes.filter((v) => voterIds.has(v.voterId))
-  const myDouze = allDouze.filter((d) => voterIds.has(d.voterId))
-  const myOwnVotes = allVotes.filter((v) => v.voterId === me[0].id)
-  const myOwnDouze = allDouze.filter((d) => d.voterId === me[0].id)
+  const myVotes = roomVotes
+  const myDouze = roomDouze
+  const myOwnVotes = roomVotes.filter((v) => v.voterId === me[0].id)
+  const myOwnDouze = roomDouze.filter((d) => d.voterId === me[0].id)
 
   const board = leaderboard(myVotes, myDouze)
   const top3 = board.slice(0, 3)

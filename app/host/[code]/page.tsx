@@ -1,5 +1,5 @@
 import { db, rooms, voters, votes, douze } from "@/lib/db"
-import { eq } from "drizzle-orm"
+import { eq, inArray } from "drizzle-orm"
 import { notFound, redirect } from "next/navigation"
 import { getHostToken } from "@/lib/auth"
 import { getContestant } from "@/lib/contestants"
@@ -19,14 +19,16 @@ export default async function HostTvPage({ params }: { params: Promise<{ code: s
   if (!hostToken || hostToken !== room[0].hostToken) redirect(`/r/${code}`)
 
   const allVoters = await db.select().from(voters).where(eq(voters.roomCode, code))
-  const voterIds = new Set(allVoters.map((v) => v.id))
-  const allVotes = await db.select().from(votes)
-  const allDouze = await db.select().from(douze)
+  const voterIdList = allVoters.map((v) => v.id)
 
-  const myVotes = allVotes.filter((v) => voterIds.has(v.voterId))
-  const myDouze = allDouze.filter((d) => voterIds.has(d.voterId))
+  const roomVotes = voterIdList.length
+    ? await db.select().from(votes).where(inArray(votes.voterId, voterIdList))
+    : []
+  const roomDouze = voterIdList.length
+    ? await db.select().from(douze).where(inArray(douze.voterId, voterIdList))
+    : []
 
-  const board = leaderboard(myVotes, myDouze).slice(0, 12)
+  const board = leaderboard(roomVotes, roomDouze).slice(0, 12)
 
   return (
     <main className="min-h-dvh p-8 md:p-16">

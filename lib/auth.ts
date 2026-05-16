@@ -14,11 +14,13 @@ import { cookies } from "next/headers"
 
 const COOKIE_DAYS = 2
 const COOKIE_MAX_AGE = 60 * 60 * 24 * COOKIE_DAYS
+const SECURE_COOKIES = process.env.NODE_ENV === "production"
 
 export async function setVoterCookie(roomCode: string, token: string) {
   const c = await cookies()
   c.set(`v26_v_${roomCode}`, token, {
     httpOnly: true,
+    secure: SECURE_COOKIES,
     sameSite: "lax",
     path: "/",
     maxAge: COOKIE_MAX_AGE,
@@ -29,6 +31,7 @@ export async function setHostCookie(roomCode: string, token: string) {
   const c = await cookies()
   c.set(`v26_h_${roomCode}`, token, {
     httpOnly: true,
+    secure: SECURE_COOKIES,
     sameSite: "lax",
     path: "/",
     maxAge: COOKIE_MAX_AGE,

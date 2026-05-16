@@ -10,6 +10,7 @@ export async function setLang(lang: Lang) {
   const c = await cookies()
   c.set(LANG_COOKIE, lang, {
     httpOnly: false,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
     maxAge: 60 * 60 * 24 * 30,

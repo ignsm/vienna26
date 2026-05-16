@@ -1,5 +1,5 @@
 import { db, rooms, voters, douze } from "@/lib/db"
-import { eq } from "drizzle-orm"
+import { eq, inArray } from "drizzle-orm"
 import { notFound, redirect } from "next/navigation"
 import { getVoterToken } from "@/lib/auth"
 import { getT } from "@/lib/i18n/server"
@@ -50,10 +50,12 @@ export default async function VsRealityPage({ params }: { params: Promise<{ code
   const realOrdered = realRanking(real)
   const realTop10 = realOrdered.slice(0, 10)
 
-  // Per-voter top-10 by their douze picks (12 → 1).
+  // Per-voter top-10 by their douze picks (12 → 1). Scoped to this room.
   const allVoters = await db.select().from(voters).where(eq(voters.roomCode, code))
-  const allDouze = await db.select().from(douze)
-  const voterMap = new Map(allVoters.map((v) => [v.id, v]))
+  const voterIdList = allVoters.map((v) => v.id)
+  const allDouze = voterIdList.length
+    ? await db.select().from(douze).where(inArray(douze.voterId, voterIdList))
+    : []
 
   type Scored = {
     voterId: string
