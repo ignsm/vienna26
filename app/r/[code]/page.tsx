@@ -41,6 +41,7 @@ export default async function RoomPage({ params }: { params: Promise<{ code: str
     <main className="min-h-dvh">
       <RoomHeader
         roomCode={code}
+        roomName={room[0].name}
         meId={me[0].id}
         meName={me[0].displayName}
         voters={allVoters.map((v) => ({ id: v.id, displayName: v.displayName }))}

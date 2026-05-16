@@ -7,6 +7,7 @@ import { openDouzeRound } from "@/lib/actions/rooms"
 
 type Props = {
   roomCode: string
+  roomName: string | null
   meId: string
   meName: string
   voters: { id: string; displayName: string }[]
@@ -15,7 +16,7 @@ type Props = {
   realResultsReady: boolean
 }
 
-export function RoomHeader({ roomCode, meId, meName, voters, isHost, douzeOpen, realResultsReady }: Props) {
+export function RoomHeader({ roomCode, roomName, meId, meName, voters, isHost, douzeOpen, realResultsReady }: Props) {
   const [copied, setCopied] = useState(false)
   const [pending, start] = useTransition()
 
@@ -33,13 +34,16 @@ export function RoomHeader({ roomCode, meId, meName, voters, isHost, douzeOpen, 
   return (
     <header className="sticky top-0 z-30 backdrop-blur-md bg-black/30 border-b border-white/10">
       <div className="px-4 py-3 max-w-2xl mx-auto flex items-center gap-3">
-        <Link href="/" className="text-white/70 hover:text-white text-sm">
+        <Link href="/" className="text-white/70 hover:text-white text-sm shrink-0">
           vienna<span className="text-[color:var(--pink)]">26</span>
         </Link>
+        {roomName && (
+          <span className="text-white/80 text-sm font-medium truncate">{roomName}</span>
+        )}
 
         <button
           onClick={onCopy}
-          className="ml-auto flex items-center gap-2 rounded-pill bg-white/10 hover:bg-white/20 px-3 py-1.5 text-sm transition"
+          className="ml-auto flex items-center gap-2 rounded-pill bg-white/10 hover:bg-white/20 px-3 py-1.5 text-sm transition shrink-0"
           title="Copy invite link"
         >
           <span className="font-mono text-base tracking-widest text-white">{roomCode}</span>

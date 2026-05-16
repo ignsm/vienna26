@@ -26,6 +26,16 @@ export default async function CreateRoomPage() {
             />
           </label>
 
+          <label className="block space-y-2">
+            <span className="text-white/80 text-sm font-medium">{t("create.room_name.label")}</span>
+            <input
+              name="roomName"
+              maxLength={48}
+              placeholder={t("create.room_name.placeholder")}
+              className="w-full rounded-pill bg-white/95 text-black px-5 py-3 outline-none focus:ring-2 ring-[color:var(--pink)]"
+            />
+          </label>
+
           <button type="submit" className="pill-pink w-full text-base py-3">
             {t("create.submit")}
           </button>

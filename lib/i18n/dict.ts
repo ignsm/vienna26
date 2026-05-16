@@ -12,8 +12,10 @@ const en: Dict = {
   "home.footer": "Final — May 16, 2026, 21:00 CET.",
 
   "create.title": "Create a room",
-  "create.hint": "Pick a host name. We'll generate a short room code to share with friends.",
-  "create.name.label": "Your name",
+  "create.hint": "Pick your jury name. We'll generate a short code to share with friends.",
+  "create.room_name.label": "Room label (optional)",
+  "create.room_name.placeholder": "e.g. Sunday at Ignat's",
+  "create.name.label": "Your jury name",
   "create.name.placeholder": "e.g. Ignat",
   "create.submit": "Create room",
 
@@ -93,8 +95,10 @@ const ru: Dict = {
   "home.footer": "Финал — 16 мая 2026, 21:00 CET.",
 
   "create.title": "Создать комнату",
-  "create.hint": "Введи имя хоста — мы выдадим короткий код, которым ты поделишься с друзьями.",
-  "create.name.label": "Твоё имя",
+  "create.hint": "Впиши своё имя в жюри. Мы выдадим короткий код для друзей.",
+  "create.room_name.label": "Имя комнаты (необязательно)",
+  "create.room_name.placeholder": "напр. Воскресенье у Игната",
+  "create.name.label": "Твоё имя в жюри",
   "create.name.placeholder": "напр. Игнат",
   "create.submit": "Создать комнату",
 

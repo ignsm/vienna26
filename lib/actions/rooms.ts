@@ -9,11 +9,16 @@ import { newRoomCode, newToken } from "@/lib/codes"
 import { setHostCookie, setVoterCookie, getVoterToken } from "@/lib/auth"
 
 const NameSchema = z.string().trim().min(1).max(32)
+const RoomNameSchema = z.string().trim().min(1).max(48).optional()
 const CodeSchema = z.string().trim().toUpperCase().regex(/^[A-Z0-9]{3,8}$/)
 
 export async function createRoom(formData: FormData) {
   const hostName = NameSchema.parse(formData.get("name"))
-  // Retry on collision (4-char alphabet has 31^4 = ~923k slots, but be safe)
+  const rawRoomName = formData.get("roomName")
+  const roomName = RoomNameSchema.parse(
+    typeof rawRoomName === "string" && rawRoomName.trim().length > 0 ? rawRoomName : undefined,
+  )
+
   let code = newRoomCode()
   for (let i = 0; i < 8; i++) {
     const existing = await db.select({ code: rooms.code }).from(rooms).where(eq(rooms.code, code)).limit(1)
@@ -22,7 +27,7 @@ export async function createRoom(formData: FormData) {
   }
 
   const hostToken = newToken()
-  await db.insert(rooms).values({ code, hostToken, hostName })
+  await db.insert(rooms).values({ code, name: roomName ?? null, hostToken, hostName })
 
   const voterToken = newToken()
   await db.insert(voters).values({ roomCode: code, token: voterToken, displayName: hostName })

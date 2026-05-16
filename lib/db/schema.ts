@@ -11,6 +11,7 @@ import { pgTable, text, integer, timestamp, jsonb, uuid, uniqueIndex, smallint }
 
 export const rooms = pgTable("rooms", {
   code: text("code").primaryKey(),
+  name: text("name"), // optional friendly label; room is always identified by `code`
   hostToken: text("host_token").notNull(),
   hostName: text("host_name").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
