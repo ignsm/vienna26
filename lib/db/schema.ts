@@ -6,7 +6,9 @@ import { pgTable, text, integer, timestamp, jsonb, uuid, uniqueIndex, smallint, 
  *         ├─ votes (per contestant, 4 axes)
  *         └─ douze (10 picks per voter, distinct points)
  *
- *  realResults: { "1": ranking_of_contestant_1, ... } — vbed by host on /admin
+ *  realResults (deprecated): per-room real-ranking JSONB. Superseded by the
+ *  static lib/real-results.ts global file. Column kept for safe rollback; will
+ *  be dropped in a future migration.
  */
 
 export const rooms = pgTable("rooms", {

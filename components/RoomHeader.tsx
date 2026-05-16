@@ -6,6 +6,7 @@ import { IconUsers, IconShare, IconCheck, IconSettings, IconClose } from "@/comp
 import { setLang } from "@/lib/i18n/actions"
 import { openRoomToFriends } from "@/lib/actions/rooms"
 import type { Lang } from "@/lib/i18n/dict"
+import { isRealResultsReady } from "@/lib/real-results"
 
 type Props = {
   roomCode: string
@@ -15,7 +16,6 @@ type Props = {
   voters: { id: string; displayName: string }[]
   isHost: boolean
   isPrivate?: boolean
-  realResultsReady: boolean
   lang: Lang
 }
 
@@ -28,9 +28,9 @@ export function RoomHeader({
   voters,
   isHost,
   isPrivate = false,
-  realResultsReady,
   lang,
 }: Props) {
+  const realResultsReady = isRealResultsReady()
   const [copied, setCopied] = useState(false)
   const [open, setOpen] = useState<OpenPopover>(null)
   const [, startTransition] = useTransition()
@@ -72,7 +72,6 @@ export function RoomHeader({
       jurors: "Jurors",
       settings: "Settings",
       language: "Language",
-      admin: "Admin",
       tv: "TV view",
       vs: "vs Reality",
       you: "you",
@@ -84,7 +83,6 @@ export function RoomHeader({
       jurors: "Жюри",
       settings: "Настройки",
       language: "Язык",
-      admin: "Админка",
       tv: "TV-режим",
       vs: "vs Реальность",
       you: "ты",
@@ -239,22 +237,13 @@ export function RoomHeader({
                 </Link>
               )}
               {isHost && (
-                <>
-                  <Link
-                    href={`/admin/${roomCode}`}
-                    onClick={() => setOpen(null)}
-                    className="block px-2.5 py-2 rounded-lg hover:bg-white/10 text-white/85 text-sm"
-                  >
-                    {t("admin")}
-                  </Link>
-                  <Link
-                    href={`/host/${roomCode}`}
-                    onClick={() => setOpen(null)}
-                    className="block px-2.5 py-2 rounded-lg hover:bg-white/10 text-white/85 text-sm"
-                  >
-                    {t("tv")}
-                  </Link>
-                </>
+                <Link
+                  href={`/host/${roomCode}`}
+                  onClick={() => setOpen(null)}
+                  className="block px-2.5 py-2 rounded-lg hover:bg-white/10 text-white/85 text-sm"
+                >
+                  {t("tv")}
+                </Link>
               )}
             </div>
           </div>

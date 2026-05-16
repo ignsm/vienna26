@@ -4,11 +4,11 @@ Home jury for the Eurovision 2026 grand final. Watch with friends, rate every
 act on 4 axes, split your 12 points at the end, then compare your top to the
 real ranking. Built in one evening with Next.js + Postgres.
 
-Live: TBD (drop your deployed URL here).
+Live: https://vienna26.vercel.app
 
 ## Stack
 
-- Next.js 15 (App Router, Server Actions, RSC)
+- Next.js 16 (App Router, Server Actions, RSC, Fluid Compute)
 - Postgres via Drizzle ORM (works with Neon, Supabase, or any Postgres)
 - Tailwind 3
 - pnpm
@@ -45,13 +45,12 @@ correlation, and top-K hit rate.
 | Path                       | What                                                       |
 | -------------------------- | ---------------------------------------------------------- |
 | `/`                        | Landing — create or join a room                            |
-| `/create`                  | Create a room, pick your jury name (room label optional)   |
+| `/create`                  | Create a room, pick your name (room label optional)        |
 | `/join?code=ABCD`          | Join an existing room                                      |
 | `/r/[code]`                | Voting screen — one act per screen, one-tap scoring        |
 | `/r/[code]/results`        | Live leaderboard, polled every 3s                          |
-| `/r/[code]/douze`          | 12-point distribution (unlocked by host)                   |
+| `/r/[code]/douze`          | 12-point distribution (top-10 of the night)                |
 | `/r/[code]/vs-reality`     | Per-juror top-10 vs the real ranking, Spearman accuracy    |
-| `/admin/[code]`            | Host-only — open douze round, paste real results           |
 | `/host/[code]`             | TV view — big screen leaderboard for casting               |
 | `/global`                  | Cross-room aggregation — every voter, every room           |
 
@@ -62,12 +61,17 @@ Per contestant:
 ```
 base   = avg over voters of (vocal + performance + song + hotness) / 4   ∈ [0, 10]
 douze  = sum over voters of their douze points (12, 10, 8, ..., 1)       ∈ [0, voters · 12]
-total  = base · 10 + douze
+total  = douze
 ```
 
-The 10x weight on `base` keeps both halves of the score roughly comparable in
-magnitude. The final leaderboard is a real blend of "everyone liked it" and
-"someone loved it enough to spend 12 on it".
+`total` only counts the 12-points rounds (Eurovision-style). Per-act ratings
+power the bonus boards on `/r/[code]/results` — hottest acts, best vocals,
+best stage — but they don't move the main leaderboard. Someone has to spend
+their 12 on you for you to win.
+
+Real final ranking lives in `lib/real-results.ts` — a static file committed
+to the repo. Update it the night of the final, push to `main`, Vercel redeploys
+in ~30s and every room sees the comparison at `/r/[code]/vs-reality`.
 
 ## Offline behavior
 
@@ -98,11 +102,16 @@ Translations live in `lib/i18n/dict.ts`.
 ## Database
 
 ```
-rooms        — code (PK), name?, hostToken, hostName, realResults JSONB, douzeOpen
-voters       — id (UUID), roomCode, token, displayName
-votes        — voterId × contestantId (unique), vocal/performance/song/hotness 0..10
-douze        — voterId × contestantId (unique), voterId × points (unique)
+rooms              — code (PK), name?, hostToken, hostName, isPrivate
+voters             — id (UUID), roomCode, token, displayName
+votes              — voterId × contestantId (unique), vocal/performance/song/hotness 0..10
+douze              — voterId × contestantId (unique), voterId × points (unique)
+ratelimit_events   — sliding-window rate limit log, cleaned periodically
 ```
+
+`rooms.realResults` (JSONB) is a legacy column kept for backward compatibility.
+Real-results data now lives in `lib/real-results.ts`, not in the DB. The column
+will be dropped in a future migration.
 
 Identity is per-room cookie (`v26_v_<CODE>`, `v26_h_<CODE>`). No accounts, no
 emails. Tokens are 24-char nanoids — enough for a party app.

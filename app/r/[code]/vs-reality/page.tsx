@@ -5,19 +5,11 @@ import { getVoterToken } from "@/lib/auth"
 import { getT } from "@/lib/i18n/server"
 import { CONTESTANTS, getContestant } from "@/lib/contestants"
 import { spearman, topKHitRate } from "@/lib/scoring"
+import { REAL_FINAL_RANKING, isRealResultsReady, realResultsAsRankMap } from "@/lib/real-results"
 import { TipJar } from "@/components/TipJar"
 import Link from "next/link"
 
 export const dynamic = "force-dynamic"
-
-type RealMap = Record<string, number>
-
-function realRanking(real: RealMap): number[] {
-  // Map back to a flat ordered list of contestant ids, rank 1..N.
-  return Object.entries(real)
-    .sort(([, a], [, b]) => a - b)
-    .map(([cid]) => Number(cid))
-}
 
 export default async function VsRealityPage({ params }: { params: Promise<{ code: string }> }) {
   const { code: raw } = await params
@@ -31,7 +23,7 @@ export default async function VsRealityPage({ params }: { params: Promise<{ code
 
   const { t } = await getT()
 
-  if (!room[0].realResults) {
+  if (!isRealResultsReady()) {
     return (
       <main className="min-h-dvh p-4">
         <div className="max-w-2xl mx-auto space-y-6">
@@ -47,8 +39,8 @@ export default async function VsRealityPage({ params }: { params: Promise<{ code
     )
   }
 
-  const real = room[0].realResults as RealMap
-  const realOrdered = realRanking(real)
+  const real = realResultsAsRankMap()
+  const realOrdered = [...REAL_FINAL_RANKING]
   const realTop10 = realOrdered.slice(0, 10)
 
   // Per-voter top-10 by their douze picks (12 → 1). Scoped to this room.

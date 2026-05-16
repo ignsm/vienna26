@@ -12,16 +12,17 @@ const COPY = {
     next: "Next →",
     done: "Got it 🎤",
     s1Title: "Two ways to vote",
-    s1Body: "There are two scoring systems running in parallel. They both count toward the room leaderboard but they work differently.",
+    s1Body:
+      "Two scoring systems run side by side. Per-act ratings power the bonus boards (hottest, best vocals, best stage). Your 12-points decide the actual winner, Eurovision-style.",
     s2Title: "1 · Rate every act",
     s2Body:
       "While the show is on, tap one of 5 buttons per song (1 = nope, 5 = iconic). One tap scores all 4 axes (vocal / stage / song / hotness) at once. Switch to ‘Detail’ if you want them separate.",
     s3Title: "2 · Give your 12 points",
     s3Body:
       "After all 25 acts, distribute Eurovision-style points to your top 10: 12 to your favourite, then 10, 8, 7, 6, 5, 4, 3, 2, 1. The drama happens here.",
-    s4Title: "How they combine",
+    s4Title: "How the total works",
     s4Body:
-      "Final score = sum of everyone’s per-act ratings + sum of everyone’s 12-points. So broad approval AND someone’s 12 both push a country up the board.",
+      "Final score = sum of everyone’s 12-points. Per-act ratings don’t touch the total, they just rank the bonus boards (hottest / best vocals / best stage). Eurovision is a 12-point game.",
   },
   ru: {
     skip: "Пропустить",
@@ -29,16 +30,16 @@ const COPY = {
     done: "Поехали 🎤",
     s1Title: "Два способа голосовать",
     s1Body:
-      "Две системы оценок работают параллельно. Обе влияют на финальный лидерборд комнаты, но устроены по-разному.",
+      "Две системы параллельно. Поактные оценки кормят бонусные топы (самые горячие, лучший вокал, лучшее шоу). 12 баллов решают победителя — как на настоящем Евровидении.",
     s2Title: "1 · Оцениваешь каждый номер",
     s2Body:
       "Пока идёт шоу, тапаешь одну из 5 кнопок (1 — мимо, 5 — икона). Один тап ставит балл сразу по 4 осям (вокал / шоу / песня / секс). Хочешь развести их отдельно — переключи на «Детально».",
     s3Title: "2 · Раздаёшь свои 12 баллов",
     s3Body:
       "После всех 25 номеров раздаёшь баллы по правилам Евровидения своему топ-10: 12 фавориту, дальше 10, 8, 7, 6, 5, 4, 3, 2, 1. Главная драма ночи.",
-    s4Title: "Как это складывается",
+    s4Title: "Как считается итог",
     s4Body:
-      "Итоговый балл = сумма поактных оценок всех жюри + сумма 12-баллов всех жюри. Так что и широкая любовь и чей-то жирный douze тащат страну наверх.",
+      "Итог = сумма 12-баллов всего жюри. Пять кнопок per-act на итог не влияют, они только ранжируют бонусные топы (горячие / вокал / шоу). Евровидение — игра 12-балльной шкалы.",
   },
 } as const
 
@@ -178,10 +179,14 @@ function ArtDouze() {
 
 function ArtFormula() {
   return (
-    <div className="font-mono text-xs text-black/75 bg-black/[0.04] rounded-xl px-3 py-2.5 text-center">
-      <span className="text-black/55">total</span> = Σ ratings ·{" "}
-      <span className="text-[color:var(--pink)] font-bold">votes</span> + Σ{" "}
-      <span className="text-[color:var(--gold)] font-bold">12pts</span>
+    <div className="font-mono text-xs text-black/75 bg-black/[0.04] rounded-xl px-3 py-2.5 text-center space-y-0.5">
+      <div>
+        <span className="text-black/55">total</span> = Σ{" "}
+        <span className="text-[color:var(--gold)] font-bold">12pts</span>
+      </div>
+      <div className="text-black/40 text-[10px]">
+        ratings → bonus boards
+      </div>
     </div>
   )
 }

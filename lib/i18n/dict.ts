@@ -67,14 +67,6 @@ const en: Dict = {
   "results.bonus.vocal": "Best vocals",
   "results.bonus.performance": "Best performance",
 
-  "admin.title": "Admin · real results",
-  "admin.hint": "Paste 25 rows in final order: '1. Sweden', '2. Italy', etc. Country name or code works.",
-  "admin.placeholder": "1. Sweden\n2. Italy\n3. France\n...",
-  "admin.submit": "Save results",
-  "admin.saved": "Saved. Voters can now see comparison.",
-  "admin.open_douze": "Open douze round",
-  "admin.douze_open": "Douze round is open",
-
   "reality.title": "Your top vs reality",
   "reality.locked": "Real results not loaded yet — ask the host.",
   "reality.your_top": "Your top 10",
@@ -161,14 +153,6 @@ const ru: Dict = {
   "results.bonus.hotness": "Самые горячие",
   "results.bonus.vocal": "Лучший вокал",
   "results.bonus.performance": "Лучшее шоу",
-
-  "admin.title": "Админка · реальные результаты",
-  "admin.hint": "Вставь 25 строк в финальном порядке: '1. Sweden', '2. Italy', и так далее. Страна именем или кодом.",
-  "admin.placeholder": "1. Sweden\n2. Italy\n3. France\n...",
-  "admin.submit": "Сохранить результаты",
-  "admin.saved": "Сохранено. Сравнение доступно всем.",
-  "admin.open_douze": "Запустить финал (12 баллов)",
-  "admin.douze_open": "Финал открыт",
 
   "reality.title": "Твой топ vs реальность",
   "reality.locked": "Реальные результаты ещё не загружены — попроси хоста.",
