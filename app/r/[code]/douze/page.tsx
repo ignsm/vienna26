@@ -45,7 +45,6 @@ export default async function DouzePage({ params }: { params: Promise<{ code: st
         voters={allVoters.map((v) => ({ id: v.id, displayName: v.displayName }))}
         isHost={isHost}
         isPrivate={room[0].isPrivate}
-        realResultsReady={!!room[0].realResults}
         lang={lang}
       />
 
