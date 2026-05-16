@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { createRoom } from "@/lib/actions/rooms"
 import { getT } from "@/lib/i18n/server"
+import { SubmitButton } from "@/components/SubmitButton"
 
 export default async function CreateRoomPage() {
   const { t } = await getT()
@@ -36,9 +37,9 @@ export default async function CreateRoomPage() {
             />
           </label>
 
-          <button type="submit" className="pill-pink w-full text-base py-3">
+          <SubmitButton className="pill-pink w-full text-base py-3">
             {t("create.submit")}
-          </button>
+          </SubmitButton>
         </form>
 
         <Link href="/" className="text-white/50 hover:text-white text-xs block text-center">
