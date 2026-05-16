@@ -20,15 +20,24 @@ export default async function HomePage() {
       </div>
 
       {READ_ONLY ? (
-        <div className="w-full max-w-sm rounded-2xl bg-white/[0.06] border border-white/15 px-5 py-4 text-center space-y-1">
-          <p className="text-white/90 text-sm font-semibold">
-            {lang === "ru" ? "Голосование закрыто" : "Voting closed"}
-          </p>
-          <p className="text-white/60 text-xs leading-snug">
-            {lang === "ru"
-              ? "Уже зашёл в комнату? Открой её по своей ссылке — твой топ и сравнение с реальностью будут видны."
-              : "Already in a room? Open your room link — your top and reality comparison are live."}
-          </p>
+        <div className="w-full max-w-sm rounded-2xl bg-white/[0.06] border border-white/15 px-5 py-4 text-center space-y-3">
+          <div className="space-y-1">
+            <p className="text-white/90 text-sm font-semibold">
+              {lang === "ru" ? "Голосование закрыто" : "Voting closed"}
+            </p>
+            <p className="text-white/60 text-xs leading-snug">
+              {lang === "ru"
+                ? "Уже зашёл в комнату? Открой её по своей ссылке — твой топ и сравнение с реальностью будут видны."
+                : "Already in a room? Open your room link — your top and reality comparison are live."}
+            </p>
+          </div>
+          <Link
+            href="/global"
+            className="inline-flex items-center gap-2 rounded-full bg-white/[0.08] hover:bg-white/[0.15] border border-white/15 px-4 py-2 text-white/85 hover:text-white text-xs font-medium transition"
+          >
+            <IconChart size={14} className="text-[color:var(--pink)]" />
+            <span>{lang === "ru" ? "Глобальный лидерборд" : "Global leaderboard"}</span>
+          </Link>
         </div>
       ) : (
         <div className="flex flex-col gap-3 w-full max-w-sm">
@@ -54,18 +63,19 @@ export default async function HomePage() {
       <div className="mt-auto w-full flex flex-col items-center gap-4">
         <p className="text-white/40 text-xs">{t("home.footer")}</p>
 
-        {/*
-          Global leaderboard is a BROWSE action, not a creation one — give it
-          its own visual language (bordered pill with icon) so it doesn't read
-          as a third tier of the "I'm alone →" action text right above.
-        */}
-        <Link
-          href="/global"
-          className="inline-flex items-center gap-2 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 px-4 py-2 text-white/85 hover:text-white text-xs font-medium transition"
-        >
-          <IconChart size={14} className="text-[color:var(--pink)]" />
-          <span>{lang === "ru" ? "Глобальный лидерборд" : "Global leaderboard"}</span>
-        </Link>
+        {!READ_ONLY && (
+          // Global leaderboard is a BROWSE action, not a creation one — give
+          // it its own bordered-pill language so it doesn't read as a third
+          // tier of the "I'm alone →" action text right above. When READ_ONLY
+          // the same link lives inside the closed-state card instead.
+          <Link
+            href="/global"
+            className="inline-flex items-center gap-2 rounded-full bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 px-4 py-2 text-white/85 hover:text-white text-xs font-medium transition"
+          >
+            <IconChart size={14} className="text-[color:var(--pink)]" />
+            <span>{lang === "ru" ? "Глобальный лидерборд" : "Global leaderboard"}</span>
+          </Link>
+        )}
       </div>
     </main>
   )
