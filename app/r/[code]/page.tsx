@@ -57,14 +57,7 @@ export default async function RoomPage({ params }: { params: Promise<{ code: str
 
       <ProgressStrip current={myVotes.length} total={CONTESTANTS.length} label={lang === "ru" ? "ваши оценки" : "your ratings"} />
 
-      <section className="safe-x pt-4 max-w-2xl mx-auto">
-        <RoundBanner
-          roomCode={code}
-          mySubmittedDouze={myDouze.length === 10}
-          myVotesCount={myVotes.length}
-          totalActs={CONTESTANTS.length}
-          lang={lang}
-        />
+      <section className="safe-x pt-4 max-w-2xl mx-auto space-y-4">
         <VoteList
           roomCode={code}
           contestants={CONTESTANTS}
@@ -75,6 +68,13 @@ export default async function RoomPage({ params }: { params: Promise<{ code: str
             song: v.song,
             hotness: v.hotness,
           }))}
+        />
+        <RoundBanner
+          roomCode={code}
+          mySubmittedDouze={myDouze.length === 10}
+          myVotesCount={myVotes.length}
+          totalActs={CONTESTANTS.length}
+          lang={lang}
         />
       </section>
 
