@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { getT } from "@/lib/i18n/server"
 import { RecentRoomsList } from "@/components/RecentRoomsList"
+import { SubmitButton } from "@/components/SubmitButton"
 import { createSoloRoom } from "@/lib/actions/rooms"
 import { IconChart } from "@/components/icons"
 
@@ -27,9 +28,9 @@ export default async function HomePage() {
           </Link>
         </div>
         <form action={createSoloRoom}>
-          <button type="submit" className="w-full text-white/55 hover:text-white text-xs underline underline-offset-2 py-1">
+          <SubmitButton className="w-full text-white/55 hover:text-white text-xs underline underline-offset-2 py-1">
             {t("home.solo")}
-          </button>
+          </SubmitButton>
         </form>
       </div>
 
