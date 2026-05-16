@@ -8,6 +8,7 @@ import { RoomHeader } from "@/components/RoomHeader"
 import { VoteList } from "@/components/VoteList"
 import { RoomTabBar } from "@/components/RoomTabBar"
 import { ProgressStrip } from "@/components/ProgressStrip"
+import { RecentRoomsTracker } from "@/components/RecentRoomsTracker"
 
 export const dynamic = "force-dynamic"
 
@@ -37,7 +38,8 @@ export default async function RoomPage({ params }: { params: Promise<{ code: str
   const { lang } = await getT()
 
   return (
-    <main className="min-h-dvh pb-28">
+    <main className="min-h-dvh pb-32">
+      <RecentRoomsTracker code={code} roomName={room[0].name ?? null} meDisplayName={me[0].displayName} />
       <RoomHeader
         roomCode={code}
         roomName={room[0].name}
@@ -51,7 +53,7 @@ export default async function RoomPage({ params }: { params: Promise<{ code: str
 
       <ProgressStrip current={myVotes.length} total={CONTESTANTS.length} label={lang === "ru" ? "ваши оценки" : "your ratings"} />
 
-      <section className="px-4 pt-4 max-w-2xl mx-auto">
+      <section className="safe-x pt-4 max-w-2xl mx-auto">
         <VoteList
           roomCode={code}
           contestants={CONTESTANTS}

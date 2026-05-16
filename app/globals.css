@@ -19,12 +19,22 @@
   --radius-card: 16px;
 }
 
+html {
+  background: var(--mid-blue);
+  /* Ensure html bg fills safe-area on iOS. body gradient sits on top. */
+}
+
 html,
 body {
   min-height: 100dvh;
   color: var(--white);
   font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+body {
   background:
     radial-gradient(
       120% 150% at 90% -3%,
@@ -35,7 +45,23 @@ body {
       var(--hotpink)
     )
     0 0 / cover fixed;
-  -webkit-font-smoothing: antialiased;
+}
+
+@layer utilities {
+  .safe-x {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+  .safe-x-tight {
+    padding-left: max(0.75rem, env(safe-area-inset-left));
+    padding-right: max(0.75rem, env(safe-area-inset-right));
+  }
+  .safe-pb {
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  }
+  .safe-pt {
+    padding-top: max(0.5rem, env(safe-area-inset-top));
+  }
 }
 
 @layer components {

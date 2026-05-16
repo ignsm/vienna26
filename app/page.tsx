@@ -1,10 +1,11 @@
 import Link from "next/link"
 import { getT } from "@/lib/i18n/server"
+import { RecentRoomsList } from "@/components/RecentRoomsList"
 
 export default async function HomePage() {
-  const { t } = await getT()
+  const { lang, t } = await getT()
   return (
-    <main className="min-h-dvh flex flex-col items-center justify-center p-6 gap-10 text-center">
+    <main className="min-h-dvh flex flex-col items-center justify-center safe-x py-10 gap-8 text-center">
       <div className="space-y-3">
         <p className="text-white/70 text-sm tracking-[0.2em] uppercase">{t("brand.tagline")}</p>
         <h1 className="headline-display text-5xl md:text-7xl">
@@ -22,6 +23,8 @@ export default async function HomePage() {
           {t("home.join")}
         </Link>
       </div>
+
+      <RecentRoomsList lang={lang} />
 
       <p className="text-white/40 text-xs">{t("home.footer")}</p>
 

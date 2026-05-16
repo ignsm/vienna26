@@ -7,7 +7,7 @@ type Props = {
 export function ProgressStrip({ current, total, label }: Props) {
   const pct = Math.max(0, Math.min(100, (current / total) * 100))
   return (
-    <div className="sticky top-[60px] z-20 -mx-4 px-4 pt-2 pb-3 bg-gradient-to-b from-[#000c54]/80 to-transparent backdrop-blur-sm">
+    <div className="sticky top-[56px] z-20 safe-x pt-2 pb-3 bg-gradient-to-b from-[#000c54]/85 to-transparent backdrop-blur-sm">
       <div className="max-w-2xl mx-auto">
         <div className="flex items-baseline justify-between mb-1">
           <span className="text-[11px] uppercase tracking-widest text-white/45">
