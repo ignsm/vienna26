@@ -13,8 +13,8 @@ export default async function HomePage() {
       <div className="space-y-3">
         <p className="text-white/70 text-sm tracking-[0.2em] uppercase">{t("brand.tagline")}</p>
         <h1 className="headline-display text-5xl md:text-7xl">
-          <span className="text-[color:var(--pink)]">vienna</span>
-          <span className="text-white">26</span>
+          <span className="text-[color:var(--pink)]">Banga</span>
+          <span className="text-white">ranga</span>
         </h1>
         <p className="text-white/80 max-w-md mx-auto text-lg">{t("home.subtitle")}</p>
       </div>
