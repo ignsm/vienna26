@@ -24,6 +24,10 @@ export default async function HomePage() {
       </div>
 
       <p className="text-white/40 text-xs">{t("home.footer")}</p>
+
+      <Link href="/global" className="text-white/40 hover:text-white text-xs underline underline-offset-2">
+        Global leaderboard →
+      </Link>
     </main>
   )
 }
