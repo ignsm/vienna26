@@ -2,9 +2,29 @@ import Link from "next/link"
 import { createRoom } from "@/lib/actions/rooms"
 import { getT } from "@/lib/i18n/server"
 import { SubmitButton } from "@/components/SubmitButton"
+import { READ_ONLY } from "@/lib/feature-flags"
 
 export default async function CreateRoomPage() {
-  const { t } = await getT()
+  const { lang, t } = await getT()
+  if (READ_ONLY) {
+    return (
+      <main className="min-h-dvh flex flex-col items-center justify-center p-6">
+        <div className="card-glass w-full max-w-md space-y-4 text-center">
+          <h1 className="headline-lg text-2xl text-white">
+            {lang === "ru" ? "Голосование закрыто" : "Voting closed"}
+          </h1>
+          <p className="text-white/70 text-sm leading-snug">
+            {lang === "ru"
+              ? "Новые комнаты больше не создаём. Реальный финал скоро будет залит — у уже созданных комнат появится сравнение."
+              : "No new rooms accepted. The real final ranking is loading shortly; existing rooms will see their comparison."}
+          </p>
+          <Link href="/" className="inline-block pill-outline text-sm px-5 py-2 mt-2">
+            ← {lang === "ru" ? "На главную" : "Back to landing"}
+          </Link>
+        </div>
+      </main>
+    )
+  }
   return (
     <main className="min-h-dvh flex flex-col items-center justify-center p-6">
       <div className="card-glass w-full max-w-md space-y-6">

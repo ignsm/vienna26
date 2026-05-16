@@ -4,6 +4,7 @@ import { RecentRoomsList } from "@/components/RecentRoomsList"
 import { SubmitButton } from "@/components/SubmitButton"
 import { createSoloRoom } from "@/lib/actions/rooms"
 import { IconChart } from "@/components/icons"
+import { READ_ONLY } from "@/lib/feature-flags"
 
 export default async function HomePage() {
   const { lang, t } = await getT()
@@ -18,21 +19,34 @@ export default async function HomePage() {
         <p className="text-white/80 max-w-md mx-auto text-lg">{t("home.subtitle")}</p>
       </div>
 
-      <div className="flex flex-col gap-3 w-full max-w-sm">
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Link href="/create" className="pill-pink flex-1 text-base">
-            {t("home.create")}
-          </Link>
-          <Link href="/join" className="pill-outline flex-1 text-base">
-            {t("home.join")}
-          </Link>
+      {READ_ONLY ? (
+        <div className="w-full max-w-sm rounded-2xl bg-white/[0.06] border border-white/15 px-5 py-4 text-center space-y-1">
+          <p className="text-white/90 text-sm font-semibold">
+            {lang === "ru" ? "Голосование закрыто" : "Voting closed"}
+          </p>
+          <p className="text-white/60 text-xs leading-snug">
+            {lang === "ru"
+              ? "Уже зашёл в комнату? Открой её по своей ссылке — твой топ и сравнение с реальностью будут видны."
+              : "Already in a room? Open your room link — your top and reality comparison are live."}
+          </p>
         </div>
-        <form action={createSoloRoom}>
-          <SubmitButton className="w-full text-white/55 hover:text-white text-xs underline underline-offset-2 py-1">
-            {t("home.solo")}
-          </SubmitButton>
-        </form>
-      </div>
+      ) : (
+        <div className="flex flex-col gap-3 w-full max-w-sm">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Link href="/create" className="pill-pink flex-1 text-base">
+              {t("home.create")}
+            </Link>
+            <Link href="/join" className="pill-outline flex-1 text-base">
+              {t("home.join")}
+            </Link>
+          </div>
+          <form action={createSoloRoom}>
+            <SubmitButton className="w-full text-white/55 hover:text-white text-xs underline underline-offset-2 py-1">
+              {t("home.solo")}
+            </SubmitButton>
+          </form>
+        </div>
+      )}
 
       <RecentRoomsList lang={lang} />
 

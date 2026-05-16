@@ -2,6 +2,7 @@ import Link from "next/link"
 import { joinRoom } from "@/lib/actions/rooms"
 import { getT } from "@/lib/i18n/server"
 import { SubmitButton } from "@/components/SubmitButton"
+import { READ_ONLY } from "@/lib/feature-flags"
 
 export default async function JoinRoomPage({
   searchParams,
@@ -11,6 +12,27 @@ export default async function JoinRoomPage({
   const { lang, t } = await getT()
   const sp = await searchParams
   const presetCode = sp.code?.toUpperCase() ?? ""
+
+  if (READ_ONLY) {
+    return (
+      <main className="min-h-dvh flex flex-col items-center justify-center p-6">
+        <div className="card-glass w-full max-w-md space-y-4 text-center">
+          <h1 className="headline-lg text-2xl text-white">
+            {lang === "ru" ? "Голосование закрыто" : "Voting closed"}
+          </h1>
+          <p className="text-white/70 text-sm leading-snug">
+            {lang === "ru"
+              ? "Новых жюри в комнаты больше не пускаем. Если ты уже в комнате — открой её прямой ссылкой."
+              : "No new jurors can join. If you're already in a room, open it directly via the room URL."}
+          </p>
+          <Link href="/" className="inline-block pill-outline text-sm px-5 py-2 mt-2">
+            ← {lang === "ru" ? "На главную" : "Back to landing"}
+          </Link>
+        </div>
+      </main>
+    )
+  }
+
   const errorMsg =
     sp.error === "not_found"
       ? lang === "ru"
