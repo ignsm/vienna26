@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useTransition, useCallback, useRef } from "react"
+import Link from "next/link"
 import type { Contestant } from "@/lib/contestants"
 import { castVote } from "@/lib/actions/votes"
 
@@ -71,9 +72,15 @@ export function VoteList({ roomCode, contestants, initialVotes }: Props) {
   const [tweakOpen, setTweakOpen] = useState(false)
   const [jumpOpen, setJumpOpen] = useState(false)
   const [online, setOnline] = useState(true)
+  const [completeModal, setCompleteModal] = useState(false)
   const [, startTransition] = useTransition()
   const [lang, setLang] = useState<"en" | "ru">("en")
   const labels = lang === "ru" ? AXIS_LABELS_RU : AXIS_LABELS_EN
+
+  // Once user has rated every act, pop a celebratory CTA to send them to /douze.
+  // Show only once per session per room — sessionStorage flag.
+  const allDoneRef = useRef(false)
+  const completeFlagKey = `v26:${roomCode}:complete-modal-shown`
 
   useEffect(() => {
     if (typeof window === "undefined") return
@@ -116,6 +123,27 @@ export function VoteList({ roomCode, contestants, initialVotes }: Props) {
   useEffect(() => {
     if (typeof window !== "undefined") localStorage.setItem(lsCursorKey(roomCode), String(cursor))
   }, [cursor, roomCode])
+
+  // Detect transition into "all 25 rated" → show completion modal once per session.
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const allDone = contestants.every((c) => {
+      const v = votes[c.id]
+      return v && AXES.every((a) => v[a] !== undefined)
+    })
+    if (allDone && !allDoneRef.current) {
+      allDoneRef.current = true
+      try {
+        const shown = sessionStorage.getItem(completeFlagKey)
+        if (!shown) {
+          setCompleteModal(true)
+          sessionStorage.setItem(completeFlagKey, "1")
+        }
+      } catch {}
+    } else if (!allDone) {
+      allDoneRef.current = false
+    }
+  }, [votes, contestants, completeFlagKey])
 
   const current = contestants[cursor]
   const currentVote = votes[current.id] ?? {}
@@ -380,6 +408,41 @@ export function VoteList({ roomCode, contestants, initialVotes }: Props) {
                 </button>
               ))}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Completion modal — pops the moment all 25 are rated */}
+      {completeModal && (
+        <div
+          className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setCompleteModal(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-3xl bg-gradient-to-br from-[color:var(--pink)] via-[color:var(--hotpink)] to-fuchsia-600 p-6 text-center shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-7xl mb-3" aria-hidden>🏆</div>
+            <h3 className="text-white font-display font-extrabold text-2xl leading-tight mb-2">
+              {lang === "ru" ? "Все 25 оценены!" : "All 25 rated!"}
+            </h3>
+            <p className="text-white/85 text-sm mb-5 leading-snug">
+              {lang === "ru"
+                ? "Теперь финал — раздай свой топ-10. Первому 12 баллов, дальше 10, 8, 7, 6, 5, 4, 3, 2, 1."
+                : "Time for the final round — distribute your 12 points to your top 10."}
+            </p>
+            <Link
+              href={`/r/${roomCode}/douze`}
+              className="block w-full py-3.5 rounded-2xl bg-white text-black font-bold text-base hover:bg-white/95 transition shadow-lg"
+            >
+              {lang === "ru" ? "Раздать 12 баллов →" : "Distribute 12 points →"}
+            </Link>
+            <button
+              onClick={() => setCompleteModal(false)}
+              className="block w-full mt-2 py-2 text-white/80 hover:text-white text-xs underline underline-offset-2"
+            >
+              {lang === "ru" ? "Остаться здесь" : "Stay here"}
+            </button>
           </div>
         </div>
       )}
