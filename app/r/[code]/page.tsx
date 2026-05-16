@@ -6,7 +6,8 @@ import { getT } from "@/lib/i18n/server"
 import { CONTESTANTS } from "@/lib/contestants"
 import { RoomHeader } from "@/components/RoomHeader"
 import { VoteList } from "@/components/VoteList"
-import { RoundBanner } from "@/components/RoundBanner"
+import { RoomTabBar } from "@/components/RoomTabBar"
+import { ProgressStrip } from "@/components/ProgressStrip"
 
 export const dynamic = "force-dynamic"
 
@@ -18,18 +19,14 @@ export default async function RoomPage({ params }: { params: Promise<{ code: str
   if (room.length === 0) notFound()
 
   const voterToken = await getVoterToken(code)
-  if (!voterToken) {
-    redirect(`/join?code=${code}`)
-  }
+  if (!voterToken) redirect(`/join?code=${code}`)
 
   const me = await db
     .select()
     .from(voters)
     .where(and(eq(voters.roomCode, code), eq(voters.token, voterToken)))
     .limit(1)
-  if (me.length === 0) {
-    redirect(`/join?code=${code}`)
-  }
+  if (me.length === 0) redirect(`/join?code=${code}`)
 
   const allVoters = await db.select().from(voters).where(eq(voters.roomCode, code))
   const myVotes = await db.select().from(votes).where(eq(votes.voterId, me[0].id))
@@ -37,10 +34,10 @@ export default async function RoomPage({ params }: { params: Promise<{ code: str
   const hostToken = await getHostToken(code)
   const isHost = hostToken === room[0].hostToken
 
-  const { lang, t } = await getT()
+  const { lang } = await getT()
 
   return (
-    <main className="min-h-dvh">
+    <main className="min-h-dvh pb-28">
       <RoomHeader
         roomCode={code}
         roomName={room[0].name}
@@ -48,22 +45,13 @@ export default async function RoomPage({ params }: { params: Promise<{ code: str
         meName={me[0].displayName}
         voters={allVoters.map((v) => ({ id: v.id, displayName: v.displayName }))}
         isHost={isHost}
-        douzeOpen={room[0].douzeOpen === 1}
+        douzeOpen={true}
         realResultsReady={!!room[0].realResults}
       />
 
-      <section className="px-4 pb-32 pt-4 max-w-2xl mx-auto">
-        <RoundBanner
-          roomCode={code}
-          mySubmittedDouze={myDouze.length === 10}
-          myVotesCount={myVotes.length}
-          totalActs={CONTESTANTS.length}
-          lang={lang}
-        />
+      <ProgressStrip current={myVotes.length} total={CONTESTANTS.length} label={lang === "ru" ? "ваши оценки" : "your ratings"} />
 
-        <h2 className="headline-lg text-2xl md:text-3xl mb-4">{t("room.vote")}</h2>
-        <p className="text-white/60 text-sm mb-6">{t("vote.tap_hint")}</p>
-
+      <section className="px-4 pt-4 max-w-2xl mx-auto">
         <VoteList
           roomCode={code}
           contestants={CONTESTANTS}
@@ -76,6 +64,16 @@ export default async function RoomPage({ params }: { params: Promise<{ code: str
           }))}
         />
       </section>
+
+      <RoomTabBar
+        roomCode={code}
+        active="vote"
+        douzeSubmitted={myDouze.length === 10}
+        douzePicks={myDouze.length}
+        votesCount={myVotes.length}
+        totalActs={CONTESTANTS.length}
+        lang={lang}
+      />
     </main>
   )
 }
