@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useEffect, useRef, useState, useTransition } from "react"
 import { IconUsers, IconShare, IconCheck, IconSettings, IconClose } from "@/components/icons"
 import { setLang } from "@/lib/i18n/actions"
+import { openRoomToFriends } from "@/lib/actions/rooms"
 import type { Lang } from "@/lib/i18n/dict"
 
 type Props = {
@@ -13,13 +14,23 @@ type Props = {
   meName: string
   voters: { id: string; displayName: string }[]
   isHost: boolean
+  isPrivate?: boolean
   realResultsReady: boolean
   lang: Lang
 }
 
 type OpenPopover = "jurors" | "settings" | null
 
-export function RoomHeader({ roomCode, roomName, meId, voters, isHost, realResultsReady, lang }: Props) {
+export function RoomHeader({
+  roomCode,
+  roomName,
+  meId,
+  voters,
+  isHost,
+  isPrivate = false,
+  realResultsReady,
+  lang,
+}: Props) {
   const [copied, setCopied] = useState(false)
   const [open, setOpen] = useState<OpenPopover>(null)
   const [, startTransition] = useTransition()
@@ -65,6 +76,9 @@ export function RoomHeader({ roomCode, roomName, meId, voters, isHost, realResul
       tv: "TV view",
       vs: "vs Reality",
       you: "you",
+      solo: "Solo session",
+      invite: "Invite friends",
+      invite_hint: "Makes the room shareable",
     }
     const ru: Record<string, string> = {
       jurors: "Жюри",
@@ -74,8 +88,20 @@ export function RoomHeader({ roomCode, roomName, meId, voters, isHost, realResul
       tv: "TV-режим",
       vs: "vs Реальность",
       you: "ты",
+      solo: "Соло-сессия",
+      invite: "Пригласить друзей",
+      invite_hint: "Откроет комнату для других",
     }
     return (lang === "ru" ? ru : en)[k] ?? k
+  }
+
+  const onMakePublic = () => {
+    startTransition(async () => {
+      try {
+        await openRoomToFriends(roomCode)
+      } catch {}
+      setOpen(null)
+    })
   }
 
   return (
@@ -101,14 +127,26 @@ export function RoomHeader({ roomCode, roomName, meId, voters, isHost, realResul
             <span className="font-mono tabular-nums">{voters.length}</span>
           </button>
 
-          <button
-            onClick={onShare}
-            className="h-9 px-3 rounded-full bg-white text-black hover:bg-white/90 active:bg-white/80 text-xs font-bold flex items-center gap-2 transition shadow-md"
-            aria-label="Share invite link"
-          >
-            {copied ? <IconCheck size={14} /> : <IconShare size={14} />}
-            <span className="font-mono tracking-widest text-sm">{roomCode}</span>
-          </button>
+          {isPrivate ? (
+            // Private (solo) room: don't show share button — there's no one to share with.
+            // Just a calm pill marking it as solo. Host can invite via Settings.
+            <span
+              className="h-9 px-3 rounded-full bg-white/10 text-white/65 text-xs font-medium flex items-center gap-1.5 leading-none"
+              title={t("solo")}
+            >
+              <IconUsers size={14} />
+              <span className="font-mono tracking-widest text-sm">{roomCode}</span>
+            </span>
+          ) : (
+            <button
+              onClick={onShare}
+              className="h-9 px-3 rounded-full bg-white text-black hover:bg-white/90 active:bg-white/80 text-xs font-bold flex items-center gap-2 transition shadow-md"
+              aria-label="Share invite link"
+            >
+              {copied ? <IconCheck size={14} /> : <IconShare size={14} />}
+              <span className="font-mono tracking-widest text-sm">{roomCode}</span>
+            </button>
+          )}
 
           <button
             onClick={() => setOpen((o) => (o === "settings" ? null : "settings"))}
@@ -181,6 +219,16 @@ export function RoomHeader({ roomCode, roomName, meId, voters, isHost, realResul
             </div>
 
             <div className="p-1.5 space-y-0.5">
+              {isHost && isPrivate && (
+                <button
+                  type="button"
+                  onClick={onMakePublic}
+                  className="w-full text-left px-2.5 py-2 rounded-lg bg-[color:var(--pink)]/15 hover:bg-[color:var(--pink)]/25 transition"
+                >
+                  <div className="text-white font-bold text-sm">{t("invite")} →</div>
+                  <div className="text-white/55 text-[11px] mt-0.5">{t("invite_hint")}</div>
+                </button>
+              )}
               {realResultsReady && (
                 <Link
                   href={`/r/${roomCode}/vs-reality`}

@@ -1,4 +1,4 @@
-import { pgTable, text, integer, timestamp, jsonb, uuid, uniqueIndex, smallint, bigserial, index } from "drizzle-orm/pg-core"
+import { pgTable, text, integer, timestamp, jsonb, uuid, uniqueIndex, smallint, bigserial, index, boolean } from "drizzle-orm/pg-core"
 
 /**
  *  rooms
@@ -14,6 +14,9 @@ export const rooms = pgTable("rooms", {
   name: text("name"), // optional friendly label; room is always identified by `code`
   hostToken: text("host_token").notNull(),
   hostName: text("host_name").notNull(),
+  // Private rooms (created by solo flow) refuse non-host visitors at /r/[code].
+  // Host can flip this to false later via "Invite friends" in settings.
+  isPrivate: boolean("is_private").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   realResults: jsonb("real_results").$type<Record<string, number> | null>(),
 })
