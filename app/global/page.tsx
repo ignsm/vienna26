@@ -94,7 +94,7 @@ export default async function GlobalPage() {
                           {r.douzeVoters === 0
                             ? "—"
                             : lang === "ru"
-                              ? `от ${r.douzeVoters} ${r.douzeVoters === 1 ? "жюри" : "жюри"}`
+                              ? `от ${r.douzeVoters} голосующих`
                               : `from ${r.douzeVoters} ${r.douzeVoters === 1 ? "juror" : "jurors"}`}
                         </div>
                       </div>
@@ -127,7 +127,7 @@ export default async function GlobalPage() {
                             {r.douzeVoters === 0
                               ? "—"
                               : lang === "ru"
-                                ? `от ${r.douzeVoters} ${r.douzeVoters === 1 ? "жюри" : "жюри"}`
+                                ? `от ${r.douzeVoters} голосующих`
                                 : `from ${r.douzeVoters} ${r.douzeVoters === 1 ? "juror" : "jurors"}`}
                           </div>
                         </div>
