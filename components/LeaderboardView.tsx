@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { getContestant } from "@/lib/contestants"
 import type { Aggregate } from "@/lib/scoring"
 import { IconClose } from "@/components/icons"
@@ -30,8 +30,27 @@ type Props = {
 export function LeaderboardView({ board, lang }: Props) {
   const [criterion, setCriterion] = useState<Criterion>("total")
   const [open, setOpen] = useState(false)
+  const selectorRef = useRef<HTMLDivElement>(null)
   const criteria = lang === "ru" ? CRITERIA_RU : CRITERIA_EN
   const current = criteria.find((c) => c.id === criterion)!
+
+  useEffect(() => {
+    if (!open) return
+    const outside = (e: MouseEvent | TouchEvent) => {
+      if (selectorRef.current && !selectorRef.current.contains(e.target as Node)) setOpen(false)
+    }
+    const esc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false)
+    }
+    document.addEventListener("mousedown", outside)
+    document.addEventListener("touchstart", outside)
+    document.addEventListener("keydown", esc)
+    return () => {
+      document.removeEventListener("mousedown", outside)
+      document.removeEventListener("touchstart", outside)
+      document.removeEventListener("keydown", esc)
+    }
+  }, [open])
 
   const sorted = [...board].sort((a, b) => (b[criterion] as number) - (a[criterion] as number))
   const top3 = sorted.slice(0, 3)
@@ -40,7 +59,7 @@ export function LeaderboardView({ board, lang }: Props) {
   return (
     <div className="space-y-5">
       {/* Sort selector */}
-      <div className="relative">
+      <div className="relative" ref={selectorRef}>
         <button
           onClick={() => setOpen((v) => !v)}
           className="w-full h-14 rounded-2xl bg-white/[0.08] hover:bg-white/[0.14] border border-white/15 transition flex items-center gap-3 px-4 text-left"
