@@ -11,12 +11,13 @@ type Props = {
   roomCode: string
   contestants: Contestant[]
   initialPicks: { contestantId: number; points: number }[]
+  myRatings?: { contestantId: number; sum: number }[]
   lang?: "en" | "ru"
 }
 
 const POINTS = [...DOUZE_POINTS] // [12, 10, 8, 7, 6, 5, 4, 3, 2, 1]
 
-export function DouzePicker({ roomCode, contestants, initialPicks, lang = "en" }: Props) {
+export function DouzePicker({ roomCode, contestants, initialPicks, myRatings = [], lang = "en" }: Props) {
   const initialOrder: (number | null)[] = POINTS.map((p) => {
     const found = initialPicks.find((pk) => pk.points === p)
     return found ? found.contestantId : null
@@ -46,6 +47,34 @@ export function DouzePicker({ roomCode, contestants, initialPicks, lang = "en" }
     setOrder(POINTS.map(() => null))
   }
 
+  // Auto-fill top 10 from per-act ratings, sorted by sum desc, ties broken by running order (id asc)
+  const autoFillFromRate = () => {
+    if (myRatings.length === 0) return
+    const overwrite = filled.length > 0
+      ? (typeof window !== "undefined"
+          ? window.confirm(
+              lang === "ru"
+                ? "Перезаписать твои текущие выборы из оценок Rate?"
+                : "Overwrite your current picks with auto-fill from Rate?",
+            )
+          : true)
+      : true
+    if (!overwrite) return
+
+    const ranked = [...myRatings]
+      .sort((a, b) => b.sum - a.sum || a.contestantId - b.contestantId)
+      .slice(0, 10)
+      .map((r) => r.contestantId)
+    // Pad with nulls if fewer than 10 rated
+    const padded: (number | null)[] = [...ranked]
+    while (padded.length < 10) padded.push(null)
+    setOrder(padded)
+    setSubmitted(false)
+    setError(null)
+  }
+
+  const canAutoFill = myRatings.length > 0
+
   const onSubmit = () => {
     if (!complete) return
     setError(null)
@@ -62,6 +91,25 @@ export function DouzePicker({ roomCode, contestants, initialPicks, lang = "en" }
 
   return (
     <div className="space-y-5">
+      {/* Optional: auto-fill from per-act Rate scores */}
+      {canAutoFill && (
+        <button
+          type="button"
+          onClick={autoFillFromRate}
+          className="w-full rounded-2xl border border-dashed border-white/25 bg-white/[0.06] hover:bg-white/[0.12] backdrop-blur-sm transition px-4 py-3 text-left"
+        >
+          <p className="text-white font-bold text-sm flex items-center gap-2">
+            <span className="text-base">✨</span>
+            {lang === "ru" ? "Авто-заполнить из моих оценок" : "Auto-fill from my Rate scores"}
+          </p>
+          <p className="text-white/55 text-xs mt-0.5">
+            {lang === "ru"
+              ? `На основе ${myRatings.length} оценок: топ-10 → 12, 10, 8, 7, 6, 5, 4, 3, 2, 1. Потом можно подправить руками.`
+              : `Uses your ${myRatings.length} ratings: top 10 → 12, 10, 8, 7, 6, 5, 4, 3, 2, 1. You can tweak after.`}
+          </p>
+        </button>
+      )}
+
       {/* Table: points | country combobox */}
       <section className="card-light !p-3 md:!p-4 space-y-2">
         <div className="flex items-center justify-between px-1">

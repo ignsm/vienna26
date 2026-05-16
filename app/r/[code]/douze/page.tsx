@@ -59,6 +59,11 @@ export default async function DouzePage({ params }: { params: Promise<{ code: st
           roomCode={code}
           contestants={CONTESTANTS}
           initialPicks={myDouze.map((d) => ({ contestantId: d.contestantId, points: d.points }))}
+          myRatings={myVotes.map((v) => ({
+            contestantId: v.contestantId,
+            sum: v.vocal + v.performance + v.song + v.hotness,
+          }))}
+          lang={lang}
         />
       </section>
 

@@ -6,7 +6,7 @@ import { MadeAt } from "@/components/MadeAt"
 export default async function HomePage() {
   const { lang, t } = await getT()
   return (
-    <main className="min-h-dvh flex flex-col items-center justify-center safe-x py-10 gap-8 text-center">
+    <main className="min-h-dvh flex flex-col items-center safe-x pt-16 pb-6 gap-8 text-center">
       <div className="space-y-3">
         <p className="text-white/70 text-sm tracking-[0.2em] uppercase">{t("brand.tagline")}</p>
         <h1 className="headline-display text-5xl md:text-7xl">
@@ -33,7 +33,7 @@ export default async function HomePage() {
         Global leaderboard →
       </Link>
 
-      <MadeAt className="mt-2" />
+      <MadeAt className="mt-auto" />
     </main>
   )
 }
