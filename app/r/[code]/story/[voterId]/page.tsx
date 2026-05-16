@@ -3,7 +3,6 @@ import { eq, and } from "drizzle-orm"
 import { notFound } from "next/navigation"
 import { getContestant } from "@/lib/contestants"
 import { DOUZE_POINTS } from "@/lib/db/schema"
-import Link from "next/link"
 
 export const dynamic = "force-dynamic"
 
@@ -56,15 +55,6 @@ export default async function StoryPage({
 
   return (
     <div className="fixed inset-0 flex flex-col text-white" style={{ background: STORY_BG }}>
-      {/* Tiny back chevron — won't matter if it ends up in the screenshot */}
-      <Link
-        href={`/r/${code}/douze`}
-        className="absolute top-3 left-3 z-10 w-9 h-9 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center text-white/65 hover:text-white text-lg"
-        aria-label="Back"
-      >
-        ←
-      </Link>
-
       <div className="flex-1 flex flex-col p-6 sm:p-10 max-w-md mx-auto w-full">
         {/* Header */}
         <header className="space-y-1 shrink-0">
