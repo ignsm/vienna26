@@ -231,6 +231,9 @@ export function VoteList({ roomCode, contestants, initialVotes }: Props) {
 
         {/* Mode switcher — segmented control. Outside the rating area so it can't be mis-tapped */}
         <div className="px-3 pt-3 md:px-4 md:pt-4">
+          <p className="text-[10px] uppercase tracking-widest text-black/45 mb-1.5 px-1">
+            {lang === "ru" ? "Как хотите оценить?" : "How to rate"}
+          </p>
           <div className="grid grid-cols-2 gap-1 p-1 rounded-full bg-black/[0.06]">
             <button
               onClick={() => setTweakOpen(false)}
