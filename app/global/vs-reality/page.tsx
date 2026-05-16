@@ -138,14 +138,19 @@ export default async function GlobalVsRealityPage() {
         {/* Crowd verdict */}
         {crowdHasData && (
           <section className="space-y-3">
-            <div className="flex items-baseline justify-between">
+            <div className="flex items-baseline justify-between gap-3">
               <h2 className="headline-lg text-xl text-white">
                 {lang === "ru" ? "Вердикт толпы" : "Crowd verdict"}
               </h2>
-              <span className="text-xs text-white/50">
+              <span className="text-xs text-white/50 shrink-0">
                 {lang === "ru" ? "Точность" : "Accuracy"}
               </span>
             </div>
+            <p className="text-white/55 text-xs leading-snug -mt-1">
+              {lang === "ru"
+                ? "Складываем 12-баллы каждого жюри из всех комнат в один общий топ и сравниваем с реальным финалом."
+                : "We sum every juror's 12-points across all rooms into one global ranking and compare it to the real final."}
+            </p>
 
             <div className="card-glass space-y-3">
               <div className="flex items-center justify-around gap-3 pb-3 border-b border-white/10">
@@ -193,12 +198,19 @@ export default async function GlobalVsRealityPage() {
 
         {/* Prophets */}
         <section className="space-y-3">
-          <div className="flex items-baseline justify-between">
+          <div className="flex items-baseline justify-between gap-3">
             <h2 className="headline-lg text-xl text-white">
               {lang === "ru" ? "Самые точные пророки" : "Most accurate prophets"}
             </h2>
-            <span className="text-xs text-white/50">{lang === "ru" ? "По всем комнатам" : "All rooms"}</span>
+            <span className="text-xs text-white/50 shrink-0">
+              {lang === "ru" ? "По всем комнатам" : "All rooms"}
+            </span>
           </div>
+          <p className="text-white/55 text-xs leading-snug -mt-1">
+            {lang === "ru"
+              ? "Каждое жюри, отдавшее все 10 баллов, сравнивается персонально с реальным финалом. Сортировка по ρ, при ничьей — по количеству попаданий в реальный топ-10."
+              : "Every juror who submitted all 10 picks is scored personally against the real final. Ranked by ρ, ties broken by top-10 hits."}
+          </p>
 
           {noProphets ? (
             <div className="card-glass text-center text-white/55 text-sm py-6">
@@ -233,12 +245,92 @@ export default async function GlobalVsRealityPage() {
             </div>
           )}
 
-          <p className="text-white/40 text-[11px] leading-snug px-1">
-            {lang === "ru"
-              ? "Spearman ρ — корреляция твоего топа с реальным финалом. 1.00 = идеальное совпадение, 0 = случайно, –1 = идеально перевёрнуто. Считается по общей части твоих 10 пиков и реального топ-25."
-              : "Spearman ρ measures rank correlation against the real final. 1.00 = perfect order, 0 = uncorrelated, –1 = perfectly reversed. Computed across the overlap between your 10 picks and the real top-25."}
-          </p>
         </section>
+
+        {/* Methodology — collapsible, default closed so it doesn't crowd the
+            scoreboards but is one tap away. */}
+        <details className="card-glass">
+          <summary className="cursor-pointer text-sm text-white/85 font-medium select-none">
+            {lang === "ru" ? "Как это всё считается?" : "How is this computed?"}
+          </summary>
+
+          <div className="mt-3 space-y-4 text-white/70 text-[13px] leading-relaxed">
+            <div>
+              <p className="text-white font-semibold mb-1 text-sm">
+                {lang === "ru" ? "Реальный финал" : "Real final"}
+              </p>
+              <p>
+                {lang === "ru"
+                  ? "Топ-25 финала Евровидения 2026 — официальный итог жюри + телеголосования. Зашит в коде проекта (lib/real-results.ts), обновляется деплоем после шоу."
+                  : "Official Eurovision 2026 grand-final top-25 (jury + televote). Baked into the codebase at lib/real-results.ts, refreshed by deploy after the show."}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-white font-semibold mb-1 text-sm">
+                {lang === "ru" ? "Вердикт толпы — топ" : "Crowd verdict — ranking"}
+              </p>
+              <p>
+                {lang === "ru"
+                  ? "Каждый член жюри в каждой комнате раздаёт 12, 10, 8, 7, 6, 5, 4, 3, 2, 1 баллов своему топ-10. Мы суммируем все эти баллы по странам через все комнаты — кто набрал больше всего, тот выше в «вердикте толпы». Поактные оценки (5-кнопочные) в этом топе не участвуют, как и на лидерборде комнат."
+                  : "Every juror in every room hands out 12, 10, 8, 7, 6, 5, 4, 3, 2, 1 to their top 10. We sum those points per country across all rooms — biggest total wins the global top. Per-act ratings (the 5-button screen) don't move this ranking, same rule as inside rooms."}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-white font-semibold mb-1 text-sm">Spearman ρ</p>
+              <p>
+                {lang === "ru"
+                  ? "Ранговая корреляция между двумя топами. Берём твои 10 пиков, смотрим какое место каждый из них занял в реальном финале, и считаем насколько порядок совпадает."
+                  : "Rank correlation between two top lists. We take your 10 picks, look up each one's real position, and compute how aligned the two orderings are."}
+              </p>
+              <ul className="mt-2 space-y-0.5 text-white/65 text-[12px]">
+                <li>
+                  <span className="font-mono text-[color:var(--gold)]">0.80–1.00</span>
+                  {" "}— {lang === "ru" ? "ты предсказал почти один в один" : "near-perfect prediction"}
+                </li>
+                <li>
+                  <span className="font-mono text-white">0.50–0.80</span>
+                  {" "}— {lang === "ru" ? "общее направление угадано" : "right general direction"}
+                </li>
+                <li>
+                  <span className="font-mono text-white/70">0.20–0.50</span>
+                  {" "}— {lang === "ru" ? "слабая связь" : "weak signal"}
+                </li>
+                <li>
+                  <span className="font-mono text-white/55">±0.20</span>
+                  {" "}— {lang === "ru" ? "практически случайно" : "basically random"}
+                </li>
+                <li>
+                  <span className="font-mono text-red-300">{"<"} 0</span>
+                  {" "}— {lang === "ru" ? "наоборот: твои фавориты — реальные аутсайдеры" : "inverted: your favourites are the real flops"}
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <p className="text-white font-semibold mb-1 text-sm">
+                {lang === "ru" ? "Попадания в топ-10" : "Top-10 hits"}
+              </p>
+              <p>
+                {lang === "ru"
+                  ? "Сколько твоих 10 пиков попали в реальный топ-10, без учёта порядка. Простой способ ощутить «угадал ли я финалистов вообще», даже если порядок совсем другой."
+                  : "How many of your 10 picks made the real top-10, ignoring order. A simpler 'did I at least pick the finalists' read for when ρ feels too abstract."}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-white font-semibold mb-1 text-sm">
+                {lang === "ru" ? "Кого считаем «пророком»" : "Who counts as a prophet"}
+              </p>
+              <p>
+                {lang === "ru"
+                  ? "Только тех, кто отправил полный douze (все 10 пиков). Неполные douze искажают Spearman — нечего сравнивать, если ты раздал только 2 балла из 10."
+                  : "Only voters who submitted a complete douze (all 10 picks). Partial douze noisy-up Spearman — there's nothing to correlate with 2 picks."}
+              </p>
+            </div>
+          </div>
+        </details>
       </div>
     </main>
   )
