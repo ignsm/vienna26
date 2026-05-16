@@ -76,3 +76,11 @@ html,
 body {
   overscroll-behavior-y: none;
 }
+
+@keyframes pulse-soft {
+  0%, 100% { box-shadow: 0 10px 25px -5px rgba(255, 23, 112, 0.4); }
+  50%      { box-shadow: 0 10px 35px 0  rgba(255, 23, 112, 0.7); }
+}
+.animate-pulse-soft {
+  animation: pulse-soft 2s ease-in-out infinite;
+}

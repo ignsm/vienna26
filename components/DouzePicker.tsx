@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useTransition } from "react"
+import Link from "next/link"
 import { submitDouze } from "@/lib/actions/votes"
 import type { Contestant } from "@/lib/contestants"
 import { DOUZE_POINTS } from "@/lib/db/schema"
@@ -172,7 +173,13 @@ export function DouzePicker({ roomCode, contestants, initialPicks }: Props) {
       </button>
 
       {submitted && (
-        <p className="text-center text-[color:var(--gold)] text-sm">✓ Submitted. Waiting for the rest of the jury.</p>
+        <Link
+          href={`/r/${roomCode}/results`}
+          className="block text-center rounded-2xl border border-[color:var(--gold)]/40 bg-[color:var(--gold)]/15 hover:bg-[color:var(--gold)]/25 transition px-5 py-4"
+        >
+          <p className="text-[color:var(--gold)] font-bold">✓ Submitted · see leaderboard →</p>
+          <p className="text-white/70 text-xs mt-1">Waiting on the rest of the jury.</p>
+        </Link>
       )}
     </div>
   )

@@ -2,8 +2,6 @@
 
 import Link from "next/link"
 import { useState } from "react"
-import { useTransition } from "react"
-import { openDouzeRound } from "@/lib/actions/rooms"
 
 type Props = {
   roomCode: string
@@ -18,7 +16,6 @@ type Props = {
 
 export function RoomHeader({ roomCode, roomName, meId, meName, voters, isHost, douzeOpen, realResultsReady }: Props) {
   const [copied, setCopied] = useState(false)
-  const [pending, start] = useTransition()
 
   const onCopy = async () => {
     try {
@@ -70,14 +67,6 @@ export function RoomHeader({ roomCode, roomName, meId, meName, voters, isHost, d
           Leaderboard
         </Link>
 
-        {douzeOpen ? (
-          <Link href={`/r/${roomCode}/douze`} className="pill bg-[color:var(--pink)] hover:brightness-110 text-white px-3 py-1.5">
-            12 points
-          </Link>
-        ) : (
-          <span className="pill bg-white/5 text-white/40 px-3 py-1.5 cursor-not-allowed">12 points · locked</span>
-        )}
-
         {realResultsReady && (
           <Link href={`/r/${roomCode}/vs-reality`} className="pill bg-[color:var(--gold)] text-black px-3 py-1.5 font-medium">
             vs Reality
@@ -92,15 +81,6 @@ export function RoomHeader({ roomCode, roomName, meId, meName, voters, isHost, d
             <Link href={`/host/${roomCode}`} className="pill bg-white/10 hover:bg-white/20 text-white px-3 py-1.5">
               TV view
             </Link>
-            {!douzeOpen && (
-              <button
-                onClick={() => start(() => openDouzeRound(roomCode))}
-                disabled={pending}
-                className="pill bg-[color:var(--gold)] text-black px-3 py-1.5 font-medium disabled:opacity-50"
-              >
-                Open 12-pt round
-              </button>
-            )}
           </>
         )}
       </nav>

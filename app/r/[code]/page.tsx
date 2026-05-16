@@ -1,4 +1,4 @@
-import { db, rooms, voters, votes } from "@/lib/db"
+import { db, rooms, voters, votes, douze } from "@/lib/db"
 import { eq, and } from "drizzle-orm"
 import { redirect, notFound } from "next/navigation"
 import { getVoterToken, getHostToken } from "@/lib/auth"
@@ -6,6 +6,7 @@ import { getT } from "@/lib/i18n/server"
 import { CONTESTANTS } from "@/lib/contestants"
 import { RoomHeader } from "@/components/RoomHeader"
 import { VoteList } from "@/components/VoteList"
+import { RoundBanner } from "@/components/RoundBanner"
 
 export const dynamic = "force-dynamic"
 
@@ -32,10 +33,11 @@ export default async function RoomPage({ params }: { params: Promise<{ code: str
 
   const allVoters = await db.select().from(voters).where(eq(voters.roomCode, code))
   const myVotes = await db.select().from(votes).where(eq(votes.voterId, me[0].id))
+  const myDouze = await db.select().from(douze).where(eq(douze.voterId, me[0].id))
   const hostToken = await getHostToken(code)
   const isHost = hostToken === room[0].hostToken
 
-  const { t } = await getT()
+  const { lang, t } = await getT()
 
   return (
     <main className="min-h-dvh">
@@ -51,6 +53,16 @@ export default async function RoomPage({ params }: { params: Promise<{ code: str
       />
 
       <section className="px-4 pb-32 pt-4 max-w-2xl mx-auto">
+        <RoundBanner
+          roomCode={code}
+          isHost={isHost}
+          douzeOpen={room[0].douzeOpen === 1}
+          mySubmitted={myDouze.length === 10}
+          myVotesCount={myVotes.length}
+          totalActs={CONTESTANTS.length}
+          lang={lang}
+        />
+
         <h2 className="headline-lg text-2xl md:text-3xl mb-4">{t("room.vote")}</h2>
         <p className="text-white/60 text-sm mb-6">{t("vote.tap_hint")}</p>
 
