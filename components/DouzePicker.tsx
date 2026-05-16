@@ -189,37 +189,35 @@ export function DouzePicker({ roomCode, contestants, initialPicks }: Props) {
 
       {error && <p className="text-red-300 text-sm">{error}</p>}
 
-      {submitted && (
-        <Link
-          href={`/r/${roomCode}/results`}
-          className="block text-center rounded-2xl border border-[color:var(--gold)]/40 bg-[color:var(--gold)]/15 hover:bg-[color:var(--gold)]/25 transition px-5 py-4"
+      {/* Inline submit + post-submit CTA. Tab bar sits below; no fixed overlay here. */}
+      <div className="space-y-3 pt-1">
+        <button
+          onClick={onSubmit}
+          disabled={!complete || pending}
+          className={`w-full py-4 rounded-2xl text-base font-bold transition shadow-lg ${
+            complete
+              ? "bg-[color:var(--pink)] text-white hover:brightness-110 shadow-[color:var(--pink)]/40"
+              : "bg-white/15 text-white/55 cursor-not-allowed"
+          }`}
         >
-          <p className="text-[color:var(--gold)] font-bold">✓ Submitted · see leaderboard →</p>
-          <p className="text-white/70 text-xs mt-1">Your 12 points are in the room totals.</p>
-        </Link>
-      )}
+          {pending
+            ? "Saving…"
+            : submitted
+              ? "Update submission"
+              : complete
+                ? "Submit 12 points"
+                : `Pick ${remaining} more`}
+        </button>
 
-      {/* Sticky submit footer — always visible while scrolling the grid */}
-      <div className="fixed bottom-0 left-0 right-0 z-20 px-4 pb-4 pt-3 bg-gradient-to-t from-[#000c54] via-[#000c54]/90 to-transparent pointer-events-none">
-        <div className="max-w-2xl mx-auto pointer-events-auto">
-          <button
-            onClick={onSubmit}
-            disabled={!complete || pending}
-            className={`w-full py-4 rounded-pill text-base font-bold transition shadow-lg ${
-              complete
-                ? "bg-[color:var(--pink)] text-white hover:brightness-110 shadow-[color:var(--pink)]/40"
-                : "bg-white/20 text-white/60 cursor-not-allowed"
-            }`}
+        {submitted && (
+          <Link
+            href={`/r/${roomCode}/results`}
+            className="block text-center rounded-2xl border border-[color:var(--gold)]/40 bg-[color:var(--gold)]/15 hover:bg-[color:var(--gold)]/25 transition px-5 py-4"
           >
-            {pending
-              ? "Saving…"
-              : submitted
-                ? "Update submission"
-                : complete
-                  ? "Submit 12 points"
-                  : `Pick ${remaining} more`}
-          </button>
-        </div>
+            <p className="text-[color:var(--gold)] font-bold">✓ Submitted · see leaderboard →</p>
+            <p className="text-white/70 text-xs mt-1">Your 12 points are in the room totals.</p>
+          </Link>
+        )}
       </div>
     </div>
   )

@@ -33,17 +33,17 @@ export default async function DouzePage({ params }: { params: Promise<{ code: st
   const { lang, t } = await getT()
 
   return (
-    <main className="min-h-dvh pb-28">
+    <main className="min-h-dvh pb-32">
       <header className="sticky top-0 z-30 backdrop-blur-md bg-black/40 border-b border-white/10">
-        <div className="px-4 py-3 max-w-2xl mx-auto flex items-center gap-3">
-          <Link href={`/r/${code}`} className="text-white/70 hover:text-white text-sm shrink-0 font-medium">
+        <div className="safe-x py-2.5 max-w-2xl mx-auto flex items-center gap-3">
+          <Link href={`/r/${code}`} className="text-white/85 hover:text-white text-base font-bold shrink-0 leading-none">
             vienna<span className="text-[color:var(--pink)]">26</span>
           </Link>
           <span className="font-mono text-sm tracking-widest text-white/80 ml-auto">{code}</span>
         </div>
       </header>
 
-      <section className="p-4 pt-5 max-w-2xl mx-auto space-y-5">
+      <section className="safe-x pt-5 max-w-2xl mx-auto space-y-5">
         <div className="space-y-1.5">
           <h1 className="headline-display text-4xl md:text-5xl">{t("douze.title")}</h1>
           <p className="text-white/70 text-sm">{t("douze.hint")}</p>
