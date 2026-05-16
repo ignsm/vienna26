@@ -2,7 +2,6 @@ import "./globals.css"
 import { Inter, Sora } from "next/font/google"
 import type { Metadata, Viewport } from "next"
 import { Analytics } from "@vercel/analytics/next"
-import { SpeedInsights } from "@vercel/speed-insights/next"
 import { getLang } from "@/lib/i18n/server"
 import { GlobalLangToggle } from "@/components/GlobalLangToggle"
 
@@ -46,7 +45,6 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <GlobalLangToggle current={lang} />
         {children}
         <Analytics />
-        <SpeedInsights />
       </body>
     </html>
   )
