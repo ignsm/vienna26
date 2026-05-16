@@ -13,7 +13,6 @@ type Props = {
   meName: string
   voters: { id: string; displayName: string }[]
   isHost: boolean
-  douzeOpen: boolean
   realResultsReady: boolean
   lang: Lang
 }

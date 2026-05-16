@@ -3,7 +3,6 @@
 import { db, rooms, voters } from "@/lib/db"
 import { eq, and } from "drizzle-orm"
 import { redirect } from "next/navigation"
-import { revalidatePath } from "next/cache"
 import { z } from "zod"
 import { newRoomCode, newToken } from "@/lib/codes"
 import { setHostCookie, setVoterCookie, getVoterToken } from "@/lib/auth"
@@ -89,14 +88,3 @@ export async function joinRoom(formData: FormData) {
   redirect(`/r/${code}`)
 }
 
-export async function openDouzeRound(roomCode: string) {
-  const code = CodeSchema.parse(roomCode)
-  const c = await import("@/lib/auth").then((m) => m.getHostToken(code))
-  if (!c) throw new Error("NOT_HOST")
-  const room = await db.select().from(rooms).where(eq(rooms.code, code)).limit(1)
-  if (room.length === 0 || room[0].hostToken !== c) throw new Error("NOT_HOST")
-
-  await db.update(rooms).set({ douzeOpen: 1 }).where(eq(rooms.code, code))
-  revalidatePath(`/r/${code}`)
-  revalidatePath(`/host/${code}`)
-}

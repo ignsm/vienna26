@@ -49,15 +49,10 @@ export default async function ResultsPage({ params }: { params: Promise<{ code: 
   const myOwnDouze = roomDouze.filter((d) => d.voterId === me[0].id)
 
   const board = leaderboard(myVotes, myDouze)
-  const top3 = board.slice(0, 3)
-  const rest = board.slice(3)
-
-  const byHotness = [...board].sort((a, b) => b.hotness - a.hotness).slice(0, 5)
-  const byVocal = [...board].sort((a, b) => b.vocal - a.vocal).slice(0, 5)
-  const byPerformance = [...board].sort((a, b) => b.performance - a.performance).slice(0, 5)
 
   const { lang, t } = await getT()
   const hasAnyVotes = board.length > 0 && board[0].total > 0
+  const douzeSubmissions = new Set(roomDouze.map((d) => d.voterId)).size
 
   return (
     <main className="min-h-dvh pb-32">
@@ -70,7 +65,6 @@ export default async function ResultsPage({ params }: { params: Promise<{ code: 
         meName={me[0].displayName}
         voters={allVoters.map((v) => ({ id: v.id, displayName: v.displayName }))}
         isHost={isHost}
-        douzeOpen={true}
         realResultsReady={!!room[0].realResults}
         lang={lang}
       />
@@ -80,7 +74,7 @@ export default async function ResultsPage({ params }: { params: Promise<{ code: 
           <h1 className="headline-display text-4xl">{t("results.title")}</h1>
           <p className="text-white/60 text-xs">
             {allVoters.length} {lang === "ru" ? "в жюри" : "jurors"} · {myVotes.length}{" "}
-            {lang === "ru" ? "оценок поставлено" : "ratings cast"} · {myDouze.length / 10}{" "}
+            {lang === "ru" ? "оценок поставлено" : "ratings cast"} · {douzeSubmissions}{" "}
             {lang === "ru" ? "финалов отправлено" : "douze submitted"}
           </p>
         </div>

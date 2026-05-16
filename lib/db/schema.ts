@@ -16,7 +16,6 @@ export const rooms = pgTable("rooms", {
   hostName: text("host_name").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   realResults: jsonb("real_results").$type<Record<string, number> | null>(),
-  douzeOpen: integer("douze_open").notNull().default(0), // 0/1 boolean: when host opens douze round
 })
 
 export const voters = pgTable(

@@ -50,7 +50,6 @@ export default async function RoomPage({ params }: { params: Promise<{ code: str
         meName={me[0].displayName}
         voters={allVoters.map((v) => ({ id: v.id, displayName: v.displayName }))}
         isHost={isHost}
-        douzeOpen={true}
         realResultsReady={!!room[0].realResults}
         lang={lang}
       />
