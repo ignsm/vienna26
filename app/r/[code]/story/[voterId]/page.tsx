@@ -1,14 +1,17 @@
 import { db, rooms, voters, douze, votes } from "@/lib/db"
 import { eq, and } from "drizzle-orm"
 import { notFound } from "next/navigation"
-import { getContestant, CONTESTANTS } from "@/lib/contestants"
+import { getContestant } from "@/lib/contestants"
 import { DOUZE_POINTS } from "@/lib/db/schema"
 import Link from "next/link"
 
 export const dynamic = "force-dynamic"
 
-// Story-shaped page (9:16). User screenshots it on their phone.
-// Designed to look good as 1080×1920 when captured.
+// Full-viewport story shot. Made for one-tap screenshot → post to Stories.
+// No surrounding chrome, no instructions — just the picks card filling the screen.
+
+const STORY_BG =
+  "radial-gradient(120% 150% at 90% -3%, #2200ff, #000c54 22.49%, #010a41 33.26% 64.14%, #4c0a54 85.82%, #ff0178)"
 
 export default async function StoryPage({
   params,
@@ -50,107 +53,83 @@ export default async function StoryPage({
 
   const rows = ranked.map((r) => ({ ...r, c: getContestant(r.id) })).filter((r) => r.c)
   const totalRated = myVotes.length
-  const lookalikeUrl = "vienna26.vercel.app"
 
   return (
-    <main className="min-h-dvh flex flex-col items-center safe-x py-4">
-      <div className="w-full max-w-md text-center mb-3">
-        <p className="text-white/55 text-xs uppercase tracking-widest">
-          Screenshot this page → save to Stories
-        </p>
-        <Link
-          href={`/r/${code}`}
-          className="text-white/40 hover:text-white text-xs underline underline-offset-2"
-        >
-          ← back to room
-        </Link>
-      </div>
-
-      {/* Story canvas: 9:16 aspect, capped to viewport */}
-      <div
-        id="story-canvas"
-        className="relative w-full max-w-[min(420px,calc(100dvh*9/16-60px))] aspect-[9/16] rounded-3xl overflow-hidden shadow-2xl border border-white/10 flex flex-col"
-        style={{
-          background:
-            "radial-gradient(120% 150% at 90% -3%, #2200ff, #000c54 22.49%, #010a41 33.26% 64.14%, #4c0a54 85.82%, #ff0178)",
-        }}
+    <div className="fixed inset-0 flex flex-col text-white" style={{ background: STORY_BG }}>
+      {/* Tiny back chevron — won't matter if it ends up in the screenshot */}
+      <Link
+        href={`/r/${code}/douze`}
+        className="absolute top-3 left-3 z-10 w-9 h-9 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center text-white/65 hover:text-white text-lg"
+        aria-label="Back"
       >
+        ←
+      </Link>
+
+      <div className="flex-1 flex flex-col p-6 sm:p-10 max-w-md mx-auto w-full">
         {/* Header */}
-        <div className="p-[6%] pb-2">
-          <p className="text-white/55 text-[2.6cqw] tracking-[0.25em] uppercase font-medium">
+        <header className="space-y-1 shrink-0">
+          <p className="text-white/55 text-[10px] uppercase tracking-[0.25em] font-medium">
             Eurovision · Vienna 2026
           </p>
-          <h1
-            className="font-display font-extrabold leading-none mt-2"
-            style={{ fontSize: "clamp(40px, 14cqw, 96px)" }}
-          >
+          <h1 className="font-display font-extrabold leading-none text-5xl">
             <span className="text-[color:var(--pink)]">vienna</span>
             <span className="text-white">26</span>
           </h1>
-          <div className="flex items-center gap-2 mt-3 flex-wrap">
-            <span className="rounded-full bg-white/15 text-white px-2.5 py-1 font-mono tracking-widest text-xs">
-              {code}
-            </span>
-            <span className="text-white/85 font-bold text-sm truncate">
-              {voter[0].displayName}&apos;s top {rows.length}
-            </span>
-          </div>
-        </div>
+          <p className="text-white/85 font-bold text-base pt-1 truncate">
+            {voter[0].displayName}&apos;s top {rows.length}
+          </p>
+        </header>
 
-        <div className="h-px bg-white/15 mx-[6%]" />
+        <div className="h-px bg-white/15 my-3 shrink-0" />
 
-        {/* Picks */}
-        <ol className="flex-1 px-[5%] py-[3%] space-y-1.5 overflow-hidden">
+        {/* Picks — flex column with equal-share rows so all 10 always fit */}
+        <ol className="flex-1 min-h-0 flex flex-col gap-1.5">
           {rows.map((r) => {
             const isTwelve = r.points === 12
             return (
               <li
                 key={r.id}
-                className={`flex items-center gap-2.5 rounded-xl px-2 py-1.5 transition ${
+                className={`flex-1 min-h-0 flex items-center gap-2 rounded-xl px-2.5 overflow-hidden ${
                   isTwelve
-                    ? "bg-gradient-to-r from-[color:var(--gold)]/30 to-transparent border border-[color:var(--gold)]/40"
-                    : "bg-black/30 border border-white/5"
+                    ? "bg-gradient-to-r from-[color:var(--gold)]/30 to-transparent border border-[color:var(--gold)]/45"
+                    : "bg-black/30 border border-white/10"
                 }`}
               >
                 <span
                   className={`shrink-0 rounded-full flex items-center justify-center font-bold tabular-nums ${
                     isTwelve
-                      ? "w-9 h-9 bg-[color:var(--gold)] text-black text-base shadow"
+                      ? "w-9 h-9 bg-[color:var(--gold)] text-black text-sm shadow"
                       : "w-7 h-7 bg-black text-white text-xs"
                   }`}
                 >
                   {r.points ?? ""}
                 </span>
-                <span className="text-2xl shrink-0">{r.c!.flag}</span>
-                <div className="flex-1 min-w-0">
-                  <div className={`truncate ${isTwelve ? "text-white font-bold text-sm" : "text-white text-xs font-medium"}`}>
+                <span className="text-xl shrink-0 leading-none">{r.c!.flag}</span>
+                <div className="flex-1 min-w-0 overflow-hidden">
+                  <div className={`truncate leading-tight ${isTwelve ? "text-white font-bold text-sm" : "text-white text-xs font-semibold"}`}>
                     {r.c!.country}
                   </div>
-                  <div className="text-white/55 text-[10px] truncate">{r.c!.artist}</div>
+                  <div className="text-white/55 text-[10px] truncate leading-tight">{r.c!.artist}</div>
                 </div>
               </li>
             )
           })}
           {rows.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-full text-center gap-2">
-              <span className="text-4xl">🎤</span>
+            <div className="flex-1 flex flex-col items-center justify-center text-center gap-2">
+              <span className="text-5xl">🎤</span>
               <p className="text-white/65 text-sm">No picks yet</p>
             </div>
           )}
         </ol>
 
         {/* Footer */}
-        <div className="px-[6%] pb-[5%] pt-2 flex items-center justify-between text-white/45 text-[10px] uppercase tracking-widest">
+        <div className="shrink-0 pt-3 flex items-center justify-between text-white/40 text-[10px] uppercase tracking-widest">
           <span>
             {totalRated} rated · {picks.length}/10 douze
           </span>
-          <span>{lookalikeUrl}</span>
+          <span>vienna26.vercel.app</span>
         </div>
       </div>
-
-      <p className="mt-4 text-white/40 text-xs text-center max-w-md">
-        On iPhone: <strong>side button + volume up</strong> for screenshot. Android: <strong>power + volume down</strong>. Then post to Stories.
-      </p>
-    </main>
+    </div>
   )
 }

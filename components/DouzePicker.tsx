@@ -25,6 +25,9 @@ export function DouzePicker({ roomCode, contestants, initialPicks, myRatings = [
   })
 
   const [order, setOrder] = useState<(number | null)[]>(initialOrder)
+  const [lastSubmitted, setLastSubmitted] = useState<(number | null)[]>(
+    initialPicks.length === 10 ? initialOrder : POINTS.map(() => null),
+  )
   const [pending, start] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [submitted, setSubmitted] = useState(initialPicks.length === 10)
@@ -34,8 +37,10 @@ export function DouzePicker({ roomCode, contestants, initialPicks, myRatings = [
   const complete = nextEmpty === -1
   const remaining = order.filter((x) => x === null).length
 
+  // dirty = current order differs from what's actually saved on the server
+  const dirty = order.some((v, i) => v !== lastSubmitted[i])
+
   const setSlot = (idx: number, id: number | null) => {
-    setSubmitted(false)
     setError(null)
     const next = [...order]
     next[idx] = id
@@ -43,7 +48,6 @@ export function DouzePicker({ roomCode, contestants, initialPicks, myRatings = [
   }
 
   const onReset = () => {
-    setSubmitted(false)
     setError(null)
     setOrder(POINTS.map(() => null))
   }
