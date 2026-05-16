@@ -6,10 +6,10 @@ type Dict = Record<string, string>
 
 const en: Dict = {
   "brand.tagline": "Eurovision",
-  "home.subtitle": "Home jury for the grand final. Vote with friends. End the night with douze points.",
+  "home.subtitle": "Watch the final with your friends, rate every act, then split your 12 points at the end. Like a real jury.",
   "home.create": "Create room",
   "home.join": "Join with code",
-  "home.footer": "Final — May 16, 2026, 21:00 CET. Let's go.",
+  "home.footer": "Final — May 16, 2026, 21:00 CET.",
 
   "create.title": "Create a room",
   "create.hint": "Pick a host name. We'll generate a short room code to share with friends.",
@@ -87,10 +87,10 @@ const en: Dict = {
 
 const ru: Dict = {
   "brand.tagline": "Евровидение",
-  "home.subtitle": "Домашнее жюри финала. Голосуй с друзьями. В конце раздай дуз пуан.",
+  "home.subtitle": "Смотрим финал с друзьями, ставим оценки за каждый номер, а в конце раздаём свои 12 баллов. Как настоящее жюри.",
   "home.create": "Создать комнату",
   "home.join": "Войти по коду",
-  "home.footer": "Финал — 16 мая 2026, 21:00 CET. Поехали.",
+  "home.footer": "Финал — 16 мая 2026, 21:00 CET.",
 
   "create.title": "Создать комнату",
   "create.hint": "Введи имя хоста — мы выдадим короткий код, которым ты поделишься с друзьями.",
@@ -111,12 +111,12 @@ const ru: Dict = {
   "room.code.copied": "Скопировано",
   "room.voters": "В комнате",
   "room.vote": "Голосовать",
-  "room.douze": "Раздать дуз пуан",
+  "room.douze": "Раздать 12 баллов",
   "room.results": "Лидерборд",
   "room.vs_reality": "Сравнить с реальностью",
   "room.host_view": "Открыть TV-режим",
-  "room.start_douze": "Открыть дуз-пуан раунд",
-  "room.douze_locked": "Дуз-пуан раунд ещё не открыт",
+  "room.start_douze": "Открыть финал (12 баллов)",
+  "room.douze_locked": "Финал ещё не открыт",
 
   "vote.vocal": "Вокал",
   "vote.performance": "Шоу",
@@ -129,7 +129,7 @@ const ru: Dict = {
   "vote.unsaved": "Ещё не голосовал",
 
   "douze.title": "Раздай свои 12 баллов",
-  "douze.hint": "Выбери топ-10 по порядку. Каждый получит от 12 до 1.",
+  "douze.hint": "Выбери топ-10 в порядке предпочтения. Первому достанется 12 баллов, последнему — 1.",
   "douze.points_left": "Осталось баллов",
   "douze.submit": "Отправить",
   "douze.submitted": "Готово. Ждём остальных.",
@@ -138,9 +138,9 @@ const ru: Dict = {
   "results.title": "Лидерборд",
   "results.column.country": "Страна",
   "results.column.base": "База",
-  "results.column.douze": "Дуз пуан",
+  "results.column.douze": "12 баллов",
   "results.column.total": "Итог",
-  "results.awaiting_douze": "Дуз-пуан раунд ещё не открыт — пока показан только базовый балл.",
+  "results.awaiting_douze": "Финал ещё не открыт — пока показан только средний балл.",
   "results.bonus.hotness": "Самые горячие",
   "results.bonus.vocal": "Лучший вокал",
   "results.bonus.performance": "Лучшее шоу",
@@ -150,8 +150,8 @@ const ru: Dict = {
   "admin.placeholder": "1. Sweden\n2. Italy\n3. France\n...",
   "admin.submit": "Сохранить результаты",
   "admin.saved": "Сохранено. Сравнение доступно всем.",
-  "admin.open_douze": "Открыть дуз-пуан раунд",
-  "admin.douze_open": "Дуз-пуан раунд открыт",
+  "admin.open_douze": "Запустить финал (12 баллов)",
+  "admin.douze_open": "Финал открыт",
 
   "reality.title": "Твой топ vs реальность",
   "reality.locked": "Реальные результаты ещё не загружены — попроси хоста.",
