@@ -21,30 +21,37 @@
 
 html {
   background: var(--mid-blue);
-  /* Ensure html bg fills safe-area on iOS. body gradient sits on top. */
 }
 
-html,
 body {
   min-height: 100dvh;
   color: var(--white);
   font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  background: var(--mid-blue); /* fallback under the fixed gradient layer */
+  position: relative;
 }
 
-body {
-  background:
-    radial-gradient(
-      120% 150% at 90% -3%,
-      var(--indigo),
-      var(--deep-blue) 22.49%,
-      var(--mid-blue) 33.26% 64.14%,
-      var(--purple) 85.82%,
-      var(--hotpink)
-    )
-    0 0 / cover fixed;
+/*
+  Gradient as a fixed pseudo-element so it stays put on scroll without
+  forcing background-attachment: fixed on body (which historically breaks
+  iOS Safari momentum scroll and creates oddly clipped scroll contexts).
+*/
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    120% 150% at 90% -3%,
+    var(--indigo),
+    var(--deep-blue) 22.49%,
+    var(--mid-blue) 33.26% 64.14%,
+    var(--purple) 85.82%,
+    var(--hotpink)
+  );
 }
 
 @layer utilities {
