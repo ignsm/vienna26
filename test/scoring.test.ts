@@ -52,14 +52,34 @@ test("aggregate sums douze points across voters", () => {
   assert.equal(agg.get(2)!.douze, 10)
 })
 
-test("aggregate total = base*10 + douze", () => {
+test("aggregate total = raw/4 + douze = base*voteCount + douze", () => {
   const votes: Vote[] = [mkVote("a", 1, 8, 8, 8, 8)]
   const douze: Douze[] = [mkDouze("a", 1, 12)]
   const agg = aggregate(votes, douze)
   const c1 = agg.get(1)!
   assert.equal(c1.base, 8)
+  assert.equal(c1.voteCount, 1)
   assert.equal(c1.douze, 12)
-  assert.equal(c1.total, 8 * 10 + 12) // 92
+  assert.equal(c1.total, 8 * 1 + 12) // 20 — narrow love doesn't dominate
+})
+
+test("breadth beats narrow love: 6 votes of 7 beats 1 vote of 10", () => {
+  // Contestant A: 6 jurors, all giving 7 across all axes; no douze
+  const votesA: Vote[] = Array.from({ length: 6 }, (_, i) =>
+    mkVote(`u${i}`, 1, 7, 7, 7, 7),
+  )
+  // Contestant B: 1 juror, gives 10 across all axes; no douze
+  const votesB: Vote[] = [mkVote("u0", 2, 10, 10, 10, 10)]
+
+  const aggA = aggregate(votesA, []).get(1)!
+  const aggB = aggregate(votesB, []).get(2)!
+  assert.equal(aggA.base, 7)
+  assert.equal(aggA.voteCount, 6)
+  assert.equal(aggA.total, 42)
+  assert.equal(aggB.base, 10)
+  assert.equal(aggB.voteCount, 1)
+  assert.equal(aggB.total, 10)
+  assert.ok(aggA.total > aggB.total)
 })
 
 test("leaderboard sorts by total desc", () => {

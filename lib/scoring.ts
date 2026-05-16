@@ -3,13 +3,17 @@ import type { Vote, Douze } from "@/lib/db/schema"
 /**
  * Per-contestant aggregates and final score.
  *
- * base   = AVG over voters of ((vocal + performance + song + hotness) / 4)         scale: 0..10
- * douze  = SUM over voters of their douze points for this contestant               scale: 0..(voters * 12)
- * total  = base * 10 + douze                                                       scale: 0..100 + 0..72
+ * base       avg of (vocal+performance+song+hotness)/4 across voters who scored this act    0..10
+ * voteCount  how many jurors gave any per-act score to this contestant
+ * raw        sum of all per-act scores. equals base * 4 * voteCount, but stored explicitly. larger when more jurors voted
+ * douze      sum of douze points across jurors                                              0..(jurors * 12)
+ * total      raw/4 + douze    — i.e. (base * voteCount) + douze
  *
- * The 10x weight on base keeps both axes roughly comparable in magnitude, so the
- * leaderboard is a real blend of "everyone liked it" + "someone loved it enough
- * to spend 12 points".
+ * Why this total: breadth + depth.
+ *   - A country rated 7 by 6 jurors → base 7, total ≥ 42 — broad appeal counts.
+ *   - A country rated 10 by 1 juror → base 10, total = 10 — narrow love doesn't dominate.
+ *   - A 12-point pick gives a juror 12 points to the act they loved → real signal, not magic constants.
+ * douze and per-act stay roughly comparable in magnitude per juror (each juror contributes up to 10 base + up to 12 douze).
  */
 
 export type Aggregate = {
@@ -19,12 +23,13 @@ export type Aggregate = {
   song: number
   hotness: number
   base: number
+  voteCount: number
+  raw: number
   douze: number
   total: number
-  voteCount: number
 }
 
-export function aggregate(votes: Vote[], douze: Douze[]): Map<number, Aggregate> {
+export function aggregate(votes: Vote[], douzeRows: Douze[]): Map<number, Aggregate> {
   const byContestant = new Map<number, Aggregate>()
 
   const ensure = (id: number): Aggregate => {
@@ -37,16 +42,16 @@ export function aggregate(votes: Vote[], douze: Douze[]): Map<number, Aggregate>
         song: 0,
         hotness: 0,
         base: 0,
+        voteCount: 0,
+        raw: 0,
         douze: 0,
         total: 0,
-        voteCount: 0,
       }
       byContestant.set(id, agg)
     }
     return agg
   }
 
-  // Sum then we'll divide for averages.
   for (const v of votes) {
     const a = ensure(v.contestantId)
     a.vocal += v.vocal
@@ -57,6 +62,7 @@ export function aggregate(votes: Vote[], douze: Douze[]): Map<number, Aggregate>
   }
 
   for (const [, a] of byContestant) {
+    a.raw = a.vocal + a.performance + a.song + a.hotness // pre-average sum across all jurors, all axes
     if (a.voteCount > 0) {
       a.vocal /= a.voteCount
       a.performance /= a.voteCount
@@ -66,29 +72,25 @@ export function aggregate(votes: Vote[], douze: Douze[]): Map<number, Aggregate>
     }
   }
 
-  for (const d of douze) {
+  for (const d of douzeRows) {
     const a = ensure(d.contestantId)
     a.douze += d.points
   }
 
   for (const [, a] of byContestant) {
-    a.total = a.base * 10 + a.douze
+    a.total = a.raw / 4 + a.douze
   }
 
   return byContestant
 }
 
-export function leaderboard(votes: Vote[], douze: Douze[]): Aggregate[] {
-  return [...aggregate(votes, douze).values()].sort((a, b) => b.total - a.total)
+export function leaderboard(votes: Vote[], douzeRows: Douze[]): Aggregate[] {
+  return [...aggregate(votes, douzeRows).values()].sort((a, b) => b.total - a.total)
 }
 
 /**
  * Spearman rank correlation between two orderings of contestant ids.
  * Returns -1..1. 1 = perfect agreement, 0 = uncorrelated, -1 = reversed.
- *
- * `predicted` and `truth` should each be arrays of contestant ids ordered
- * from best (rank 1) to worst (rank N). They MUST cover the same set of
- * contestants — we only compare items present in both.
  */
 export function spearman(predicted: number[], truth: number[]): number {
   const inBoth = predicted.filter((id) => truth.includes(id))
@@ -106,10 +108,7 @@ export function spearman(predicted: number[], truth: number[]): number {
   return 1 - (6 * sumDsq) / (n * (n * n - 1))
 }
 
-/**
- * "Accuracy" surfaced to users: how many of their top-K picks made the real top-K
- * (set intersection), expressed as a fraction.
- */
+/** "Accuracy": fraction of your top-K picks that made the real top-K. */
 export function topKHitRate(predicted: number[], truth: number[], k = 10): number {
   const p = new Set(predicted.slice(0, k))
   const t = new Set(truth.slice(0, k))
