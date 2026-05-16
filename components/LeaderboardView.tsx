@@ -62,20 +62,22 @@ export function LeaderboardView({ board, lang }: Props) {
       <div className="relative" ref={selectorRef}>
         <button
           onClick={() => setOpen((v) => !v)}
-          className="w-full h-14 rounded-2xl bg-white/[0.08] hover:bg-white/[0.14] border border-white/15 transition flex items-center gap-3 px-4 text-left"
+          className="w-full h-[68px] rounded-2xl bg-white/[0.08] hover:bg-white/[0.14] border border-white/15 transition flex flex-col items-start justify-center gap-0.5 px-5 text-left"
           aria-expanded={open}
         >
-          <span className="text-[10px] uppercase tracking-widest text-white/45 shrink-0">
+          <span className="text-[11px] uppercase tracking-[0.18em] text-white/45 leading-none">
             {lang === "ru" ? "Сортировка" : "Sort by"}
           </span>
-          <span className="font-bold text-white text-base truncate">{current.label}</span>
-          <span className="ml-auto text-white/40 shrink-0">▾</span>
+          <div className="w-full flex items-center gap-2">
+            <span className="font-bold text-white text-lg leading-none truncate">{current.label}</span>
+            <span className="ml-auto text-white/40 text-base shrink-0">▾</span>
+          </div>
         </button>
 
         {open && (
           <div className="absolute left-0 right-0 top-full mt-1.5 z-30 rounded-2xl bg-black/95 backdrop-blur border border-white/15 shadow-2xl overflow-hidden">
-            <div className="flex items-center justify-between px-3 py-2 border-b border-white/10">
-              <p className="text-white/45 text-[10px] uppercase tracking-widest">
+            <div className="flex items-center justify-between px-4 py-2.5 border-b border-white/10">
+              <p className="text-white/45 text-[11px] uppercase tracking-[0.18em]">
                 {lang === "ru" ? "Что показать" : "What to rank"}
               </p>
               <button
@@ -83,7 +85,7 @@ export function LeaderboardView({ board, lang }: Props) {
                 className="text-white/45 hover:text-white"
                 aria-label="Close"
               >
-                <IconClose size={14} />
+                <IconClose size={16} />
               </button>
             </div>
             <div className="py-1">
@@ -96,13 +98,15 @@ export function LeaderboardView({ board, lang }: Props) {
                       setCriterion(c.id)
                       setOpen(false)
                     }}
-                    className={`w-full text-left px-3 py-2.5 flex items-baseline gap-2 transition ${
+                    className={`w-full text-left px-4 py-3 flex flex-col items-start gap-0.5 transition ${
                       isActive ? "bg-[color:var(--pink)]/15" : "hover:bg-white/10"
                     }`}
                   >
-                    <span className={`font-bold text-sm ${isActive ? "text-white" : "text-white/85"}`}>{c.label}</span>
-                    <span className="text-white/45 text-[11px]">{c.hint}</span>
-                    {isActive && <span className="ml-auto text-[color:var(--pink)] text-xs font-bold">✓</span>}
+                    <div className="w-full flex items-center gap-2">
+                      <span className={`font-bold text-base ${isActive ? "text-white" : "text-white/90"}`}>{c.label}</span>
+                      {isActive && <span className="ml-auto text-[color:var(--pink)] text-sm font-bold">✓</span>}
+                    </div>
+                    <span className="text-white/50 text-[12px] leading-tight">{c.hint}</span>
                   </button>
                 )
               })}
