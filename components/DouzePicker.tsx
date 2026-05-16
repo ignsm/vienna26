@@ -241,7 +241,7 @@ export function DouzePicker({ roomCode, contestants, initialPicks }: Props) {
               ? "Update submission"
               : complete
                 ? "Submit 12 points"
-                : `Pick ${remaining} more`}
+                : `Pick ${remaining} more to submit`}
         </button>
 
         {submitted && (
