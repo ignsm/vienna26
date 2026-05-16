@@ -1,3 +1,5 @@
+import { RoomTabBarSkeleton } from "@/components/RoomTabBarSkeleton"
+
 export default function ResultsLoading() {
   return (
     <main className="min-h-dvh pb-32">
@@ -23,6 +25,8 @@ export default function ResultsLoading() {
           ))}
         </div>
       </div>
+
+      <RoomTabBarSkeleton />
     </main>
   )
 }

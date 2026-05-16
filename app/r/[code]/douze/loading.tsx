@@ -1,3 +1,5 @@
+import { RoomTabBarSkeleton } from "@/components/RoomTabBarSkeleton"
+
 export default function DouzeLoading() {
   return (
     <main className="min-h-dvh pb-32">
@@ -28,6 +30,8 @@ export default function DouzeLoading() {
 
         <div className="h-14 w-full rounded-2xl bg-[color:var(--pink)]/40" />
       </section>
+
+      <RoomTabBarSkeleton />
     </main>
   )
 }
