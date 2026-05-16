@@ -22,6 +22,13 @@ export default async function RoomPage({ params }: { params: Promise<{ code: str
   if (room.length === 0) notFound()
 
   const voterToken = await getVoterToken(code)
+  const hostToken = await getHostToken(code)
+  const isHost = hostToken === room[0].hostToken
+
+  // Private (solo) rooms refuse non-host visitors. Show a generic 404 so the
+  // existence of someone's solo session doesn't leak.
+  if (room[0].isPrivate && !isHost) notFound()
+
   if (!voterToken) redirect(`/join?code=${code}`)
 
   const me = await db
@@ -34,8 +41,6 @@ export default async function RoomPage({ params }: { params: Promise<{ code: str
   const allVoters = await db.select().from(voters).where(eq(voters.roomCode, code))
   const myVotes = await db.select().from(votes).where(eq(votes.voterId, me[0].id))
   const myDouze = await db.select().from(douze).where(eq(douze.voterId, me[0].id))
-  const hostToken = await getHostToken(code)
-  const isHost = hostToken === room[0].hostToken
 
   const { lang } = await getT()
 
@@ -50,6 +55,7 @@ export default async function RoomPage({ params }: { params: Promise<{ code: str
         meName={me[0].displayName}
         voters={allVoters.map((v) => ({ id: v.id, displayName: v.displayName }))}
         isHost={isHost}
+        isPrivate={room[0].isPrivate}
         realResultsReady={!!room[0].realResults}
         lang={lang}
       />

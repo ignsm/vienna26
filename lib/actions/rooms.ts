@@ -50,7 +50,9 @@ export async function createSoloRoom() {
   }
 
   const hostToken = newToken()
-  await db.insert(rooms).values({ code, name: "Solo session", hostToken, hostName })
+  // Solo rooms are private — non-host visitors hit a 404. Can be flipped to
+  // public later via Settings → Invite friends if a party materialises.
+  await db.insert(rooms).values({ code, name: "Solo session", hostToken, hostName, isPrivate: true })
 
   const voterToken = newToken()
   await db.insert(voters).values({ roomCode: code, token: voterToken, displayName: hostName })
@@ -135,11 +137,36 @@ export async function joinRoom(formData: FormData) {
     finalName = `${displayName} (${n})`
   }
 
+  // Private room → only the host can be inside. Anyone else trying to /join
+  // gets the same "not found" message as if the code didn't exist (don't leak
+  // the existence of someone's solo session).
+  if (room[0].isPrivate) {
+    redirect(`/join?error=not_found&code=${code}`)
+  }
+
   await checkVoterCap(code)
 
   const token = newToken()
   await db.insert(voters).values({ roomCode: code, token, displayName: finalName })
   await setVoterCookie(code, token)
   redirect(`/r/${code}`)
+}
+
+/**
+ * Flip a private (solo) room to public so the host can share the code.
+ * Host-only.
+ */
+export async function openRoomToFriends(roomCode: string) {
+  const code = CodeSchema.parse(roomCode)
+  const room = await db.select().from(rooms).where(eq(rooms.code, code)).limit(1)
+  if (room.length === 0) throw new Error("ROOM_NOT_FOUND")
+
+  const { getHostToken } = await import("@/lib/auth")
+  const token = await getHostToken(code)
+  if (!token || token !== room[0].hostToken) throw new Error("NOT_HOST")
+
+  await db.update(rooms).set({ isPrivate: false }).where(eq(rooms.code, code))
+  const { revalidatePath } = await import("next/cache")
+  revalidatePath(`/r/${code}`)
 }
 

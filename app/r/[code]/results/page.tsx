@@ -65,6 +65,7 @@ export default async function ResultsPage({ params }: { params: Promise<{ code: 
         meName={me[0].displayName}
         voters={allVoters.map((v) => ({ id: v.id, displayName: v.displayName }))}
         isHost={isHost}
+        isPrivate={room[0].isPrivate}
         realResultsReady={!!room[0].realResults}
         lang={lang}
       />
