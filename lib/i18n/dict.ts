@@ -85,6 +85,11 @@ const en: Dict = {
   "host.hint": "Cast this tab to your TV. Updates live.",
 
   "lang.toggle": "RU / EN",
+
+  "global.title": "Global jury",
+  "global.subtitle": "Aggregated across every vienna26 room.",
+  "global.voters": "voters",
+  "global.rooms": "rooms",
 }
 
 const ru: Dict = {
@@ -168,6 +173,11 @@ const ru: Dict = {
   "host.hint": "Открой эту вкладку на телевизоре. Обновляется live.",
 
   "lang.toggle": "RU / EN",
+
+  "global.title": "Глобальное жюри",
+  "global.subtitle": "Сумма голосов по всем комнатам vienna26.",
+  "global.voters": "голосующих",
+  "global.rooms": "комнат",
 }
 
 export const dict: Record<Lang, Dict> = { en, ru }
