@@ -9,6 +9,7 @@ import { PollingRefresh } from "@/components/PollingRefresh"
 import { RoomTabBar } from "@/components/RoomTabBar"
 import { RoomHeader } from "@/components/RoomHeader"
 import { LeaderboardView } from "@/components/LeaderboardView"
+import { TipJar } from "@/components/TipJar"
 import Link from "next/link"
 
 export const dynamic = "force-dynamic"
@@ -93,6 +94,16 @@ export default async function ResultsPage({ params }: { params: Promise<{ code: 
         ) : (
           <LeaderboardView board={board} lang={lang} />
         )}
+
+        <TipJar
+          labels={{
+            title: t("tip.title"),
+            coffee: t("tip.coffee"),
+            share: t("tip.share"),
+            shareText: t("tip.share_text"),
+            copied: t("tip.copied"),
+          }}
+        />
       </div>
 
       <RoomTabBar
