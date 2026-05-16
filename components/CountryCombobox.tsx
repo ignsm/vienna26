@@ -27,6 +27,10 @@ export function CountryCombobox({
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState("")
   const [isMobile, setIsMobile] = useState(false)
+  // `mounted` controls the slide-up animation on the mobile modal. It flips
+  // true on the next animation frame after `open` so the element starts at
+  // translate-y-full and transitions in. Reset to false on close.
+  const [mounted, setMounted] = useState(false)
   const wrapRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -88,6 +92,18 @@ export function CountryCombobox({
   useEffect(() => {
     if (!open) setQuery("")
   }, [open])
+
+  // Drive the mobile slide-up animation. On open, defer `mounted=true` to the
+  // next frame so the initial translate-y-full has time to commit before the
+  // transition to translate-y-0 fires. On close, reset immediately so reopen
+  // re-runs the animation.
+  useEffect(() => {
+    if (open && isMobile) {
+      const raf = requestAnimationFrame(() => setMounted(true))
+      return () => cancelAnimationFrame(raf)
+    }
+    setMounted(false)
+  }, [open, isMobile])
 
   const pick = (id: number) => {
     onChange(id)
@@ -218,13 +234,17 @@ export function CountryCombobox({
 
       {/* Mobile: fullscreen modal with sticky search header + scrollable list.
           Survives virtual keyboard (uses dvh so layout reflows when keyboard
-          shows). Body scroll is locked while open. */}
+          shows). Body scroll is locked while open. Slides up from below on
+          open via the `mounted` flag (raf-deferred so the initial transform
+          commits before the transition fires). */}
       {open && isMobile && (
         <div
           role="dialog"
           aria-modal="true"
           aria-label={lang === "ru" ? "Выбор страны" : "Country picker"}
-          className="fixed inset-0 z-50 bg-white text-black flex flex-col"
+          className={`fixed inset-0 z-50 bg-white text-black flex flex-col transition-[transform,opacity] duration-200 ease-out ${
+            mounted ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
+          }`}
           style={{ height: "100dvh" }}
         >
           <Command label="Country" shouldFilter={false} className="flex flex-col h-full">
