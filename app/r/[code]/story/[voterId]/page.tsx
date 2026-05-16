@@ -51,7 +51,6 @@ export default async function StoryPage({
   }
 
   const rows = ranked.map((r) => ({ ...r, c: getContestant(r.id) })).filter((r) => r.c)
-  const totalRated = myVotes.length
 
   return (
     <div className="fixed inset-0 flex flex-col text-white" style={{ background: STORY_BG }}>
@@ -112,12 +111,9 @@ export default async function StoryPage({
           )}
         </ol>
 
-        {/* Footer */}
-        <div className="shrink-0 pt-3 flex items-center justify-between text-white/40 text-[10px] uppercase tracking-widest">
-          <span>
-            {totalRated} rated · {picks.length}/10 douze
-          </span>
-          <span>vienna26.vercel.app</span>
+        {/* Footer — clean centered brand URL, nothing else. */}
+        <div className="shrink-0 pt-3 text-center text-white/45 text-[10px] uppercase tracking-widest">
+          vienna26.vercel.app
         </div>
       </div>
     </div>
