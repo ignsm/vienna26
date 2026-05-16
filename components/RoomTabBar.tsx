@@ -41,13 +41,13 @@ export function RoomTabBar({
       label: c.vote,
       badge: votesCount > 0 ? `${votesCount}/${totalActs}` : undefined,
     },
-    { id: "results", href: `/r/${roomCode}/results`, label: c.results },
     {
       id: "douze",
       href: `/r/${roomCode}/douze`,
       label: c.douze,
       badge: douzeSubmitted ? "✓" : douzePicks > 0 ? `${douzePicks}/10` : undefined,
     },
+    { id: "results", href: `/r/${roomCode}/results`, label: c.results },
   ]
 
   return (

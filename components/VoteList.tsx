@@ -238,7 +238,7 @@ export function VoteList({ roomCode, contestants, initialVotes }: Props) {
                 !tweakOpen ? "bg-white text-black shadow" : "text-black/55 hover:text-black/80"
               }`}
             >
-              {lang === "ru" ? "В целом" : "Overall"}
+              {lang === "ru" ? "Общая оценка" : "Overall"}
             </button>
             <button
               onClick={() => setTweakOpen(true)}
@@ -246,7 +246,7 @@ export function VoteList({ roomCode, contestants, initialVotes }: Props) {
                 tweakOpen ? "bg-white text-black shadow" : "text-black/55 hover:text-black/80"
               }`}
             >
-              {lang === "ru" ? "По осям" : "By axis"}
+              {lang === "ru" ? "Детально" : "Detail"}
             </button>
           </div>
         </div>

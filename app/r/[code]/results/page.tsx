@@ -1,12 +1,13 @@
 import { db, rooms, voters, votes, douze } from "@/lib/db"
 import { eq, and } from "drizzle-orm"
 import { notFound, redirect } from "next/navigation"
-import { getVoterToken } from "@/lib/auth"
+import { getVoterToken, getHostToken } from "@/lib/auth"
 import { getT } from "@/lib/i18n/server"
 import { CONTESTANTS, getContestant } from "@/lib/contestants"
 import { leaderboard, type Aggregate } from "@/lib/scoring"
 import { PollingRefresh } from "@/components/PollingRefresh"
 import { RoomTabBar } from "@/components/RoomTabBar"
+import { RoomHeader } from "@/components/RoomHeader"
 import Link from "next/link"
 
 export const dynamic = "force-dynamic"
@@ -30,6 +31,8 @@ export default async function ResultsPage({ params }: { params: Promise<{ code: 
 
   const allVoters = await db.select().from(voters).where(eq(voters.roomCode, code))
   const voterIds = new Set(allVoters.map((v) => v.id))
+  const hostToken = await getHostToken(code)
+  const isHost = hostToken === room[0].hostToken
 
   const allVotes = await db.select().from(votes)
   const allDouze = await db.select().from(douze)
@@ -51,19 +54,22 @@ export default async function ResultsPage({ params }: { params: Promise<{ code: 
   const hasAnyVotes = board.length > 0 && board[0].total > 0
 
   return (
-    <main className="min-h-dvh pb-28">
+    <main className="min-h-dvh pb-32">
       <PollingRefresh intervalMs={3000} />
 
-      <header className="sticky top-0 z-30 backdrop-blur-md bg-black/40 border-b border-white/10">
-        <div className="px-4 py-3 max-w-2xl mx-auto flex items-center gap-3">
-          <Link href={`/r/${code}`} className="text-white/70 hover:text-white text-sm shrink-0 font-medium">
-            vienna<span className="text-[color:var(--pink)]">26</span>
-          </Link>
-          <span className="font-mono text-sm tracking-widest text-white/80 ml-auto">{code}</span>
-        </div>
-      </header>
+      <RoomHeader
+        roomCode={code}
+        roomName={room[0].name}
+        meId={me[0].id}
+        meName={me[0].displayName}
+        voters={allVoters.map((v) => ({ id: v.id, displayName: v.displayName }))}
+        isHost={isHost}
+        douzeOpen={true}
+        realResultsReady={!!room[0].realResults}
+        lang={lang}
+      />
 
-      <div className="px-4 pt-5 max-w-2xl mx-auto space-y-6">
+      <div className="safe-x pt-5 max-w-2xl mx-auto space-y-6">
         <div className="space-y-1">
           <h1 className="headline-display text-4xl">{t("results.title")}</h1>
           <p className="text-white/60 text-xs">

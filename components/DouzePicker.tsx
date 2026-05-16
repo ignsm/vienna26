@@ -77,52 +77,76 @@ export function DouzePicker({ roomCode, contestants, initialPicks }: Props) {
     })
   }
 
+  const scrollToGrid = () => {
+    if (typeof window !== "undefined") {
+      document.getElementById("douze-grid")?.scrollIntoView({ behavior: "smooth", block: "start" })
+    }
+  }
+
   return (
     <div className="space-y-5">
-      {/* Your picks: 10 slots, gold for 12 */}
-      <section className="card-light !p-4 space-y-1.5">
-        <div className="flex items-center justify-between mb-2">
+      {/* Your picks: empty state stays compact, fills out as user picks */}
+      <section className="card-light !p-4 space-y-2">
+        <div className="flex items-center justify-between">
           <h2 className="font-bold text-black/80 text-sm uppercase tracking-widest">Your picks</h2>
-          {filled.length > 0 && (
-            <button onClick={onReset} className="text-black/40 hover:text-black/80 text-xs underline underline-offset-2">
-              Reset
-            </button>
-          )}
+          <span className="text-xs text-black/45 font-mono tabular-nums">{filled.length}/10</span>
         </div>
-        {POINTS.map((p, i) => {
-          const id = order[i]
-          const c = id ? contestants.find((x) => x.id === id) : null
-          const isTwelve = p === 12
-          return (
-            <div
-              key={p}
-              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 transition ${
-                isTwelve
-                  ? "bg-gradient-to-r from-[color:var(--gold)]/30 to-[color:var(--gold)]/10 border border-[color:var(--gold)]/50"
-                  : c
-                    ? "bg-black/5"
-                    : "bg-black/[0.02] border border-dashed border-black/15"
-              }`}
-            >
-              <span
-                className={`shrink-0 rounded-full flex items-center justify-center font-bold tabular-nums ${
-                  isTwelve
-                    ? "w-12 h-12 bg-[color:var(--gold)] text-black text-xl shadow-md shadow-[color:var(--gold)]/40"
-                    : "w-10 h-10 bg-black text-white text-base"
-                }`}
-              >
-                {p}
-              </span>
-              {c ? (
-                <>
+
+        {filled.length === 0 ? (
+          <button
+            type="button"
+            onClick={scrollToGrid}
+            className="w-full rounded-2xl border-2 border-dashed border-[color:var(--pink)]/40 bg-[color:var(--pink)]/5 px-4 py-5 text-center hover:bg-[color:var(--pink)]/10 transition active:scale-[0.99]"
+          >
+            <p className="text-base font-bold text-black/85">↓ Tap a country below</p>
+            <p className="text-xs text-black/55 mt-1">
+              First tap gets <span className="font-bold text-[color:var(--pink)]">12 points</span>, then 10, 8, 7, 6, 5, 4, 3, 2, 1
+            </p>
+          </button>
+        ) : (
+          <>
+            {POINTS.map((p, i) => {
+              const id = order[i]
+              const c = id ? contestants.find((x) => x.id === id) : null
+              const isTwelve = p === 12
+              if (!c) {
+                return (
+                  <div key={p} className="flex items-center gap-2 px-2 py-1 text-xs text-black/40">
+                    <span
+                      className={`shrink-0 rounded-full flex items-center justify-center font-bold tabular-nums text-[11px] w-6 h-6 ${
+                        isTwelve ? "bg-[color:var(--gold)] text-black" : "bg-black/65 text-white"
+                      }`}
+                    >
+                      {p}
+                    </span>
+                    <span className="italic">empty</span>
+                  </div>
+                )
+              }
+              return (
+                <div
+                  key={p}
+                  className={`flex items-center gap-3 rounded-xl px-3 py-2.5 transition ${
+                    isTwelve
+                      ? "bg-gradient-to-r from-[color:var(--gold)]/30 to-[color:var(--gold)]/10 border border-[color:var(--gold)]/50"
+                      : "bg-black/[0.04]"
+                  }`}
+                >
+                  <span
+                    className={`shrink-0 rounded-full flex items-center justify-center font-bold tabular-nums ${
+                      isTwelve
+                        ? "w-11 h-11 bg-[color:var(--gold)] text-black text-lg shadow-md shadow-[color:var(--gold)]/40"
+                        : "w-9 h-9 bg-black text-white text-sm"
+                    }`}
+                  >
+                    {p}
+                  </span>
                   <span className="text-2xl shrink-0">{c.flag}</span>
                   <div className="flex-1 min-w-0">
-                    <div className={`font-medium truncate ${isTwelve ? "text-black text-base" : "text-black/80 text-sm"}`}>
+                    <div className={`font-medium truncate ${isTwelve ? "text-black text-base" : "text-black/85 text-sm"}`}>
                       {c.country}
                     </div>
-                    <div className="text-xs text-black/55 truncate">
-                      {c.artist} · <em>{c.song}</em>
-                    </div>
+                    <div className="text-xs text-black/55 truncate">{c.artist}</div>
                   </div>
                   <button
                     onClick={() => onClearSlot(i)}
@@ -131,19 +155,21 @@ export function DouzePicker({ roomCode, contestants, initialPicks }: Props) {
                   >
                     ✕
                   </button>
-                </>
-              ) : (
-                <span className="text-black/30 text-xs italic">
-                  {isTwelve ? "tap your favourite below ↓" : "—"}
-                </span>
-              )}
-            </div>
-          )
-        })}
+                </div>
+              )
+            })}
+            <button
+              onClick={onReset}
+              className="text-black/45 hover:text-black/75 text-xs underline underline-offset-2 mt-1"
+            >
+              Reset all picks
+            </button>
+          </>
+        )}
       </section>
 
       {/* Contestant grid */}
-      <section>
+      <section id="douze-grid" className="scroll-mt-24">
         <h2 className="text-white/60 text-xs uppercase tracking-widest mb-2">
           {remaining > 0
             ? `Pick ${remaining} more (tap a country)`
@@ -168,10 +194,19 @@ export function DouzePicker({ roomCode, contestants, initialPicks }: Props) {
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-2xl">{c.flag}</span>
+                  <span
+                    className={`text-[10px] font-mono tabular-nums shrink-0 rounded px-1 py-0.5 ${
+                      pickedHere ? "bg-black/15 text-current" : "bg-black/5 text-black/55"
+                    }`}
+                  >
+                    {String(c.id).padStart(2, "0")}
+                  </span>
+                  <span className="text-xl">{c.flag}</span>
                   <span className="text-sm font-medium truncate">{c.country}</span>
                 </div>
-                <div className={`text-xs mt-1 truncate ${pickedHere ? "opacity-85" : "text-black/50"}`}>{c.artist}</div>
+                <div className={`text-xs mt-1 truncate ${pickedHere ? "opacity-85" : "text-black/55"}`}>
+                  {c.artist} <span className="italic opacity-70">· {c.song}</span>
+                </div>
                 {points !== null && (
                   <span
                     className={`absolute -top-1.5 -right-1.5 w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs ring-2 ring-black/40 ${

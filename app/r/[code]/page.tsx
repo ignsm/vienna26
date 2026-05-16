@@ -49,6 +49,7 @@ export default async function RoomPage({ params }: { params: Promise<{ code: str
         isHost={isHost}
         douzeOpen={true}
         realResultsReady={!!room[0].realResults}
+        lang={lang}
       />
 
       <ProgressStrip current={myVotes.length} total={CONTESTANTS.length} label={lang === "ru" ? "ваши оценки" : "your ratings"} />

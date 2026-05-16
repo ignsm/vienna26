@@ -1,12 +1,12 @@
 import { db, rooms, voters, douze, votes } from "@/lib/db"
 import { eq, and } from "drizzle-orm"
 import { notFound, redirect } from "next/navigation"
-import { getVoterToken } from "@/lib/auth"
+import { getVoterToken, getHostToken } from "@/lib/auth"
 import { getT } from "@/lib/i18n/server"
 import { CONTESTANTS } from "@/lib/contestants"
 import { DouzePicker } from "@/components/DouzePicker"
 import { RoomTabBar } from "@/components/RoomTabBar"
-import Link from "next/link"
+import { RoomHeader } from "@/components/RoomHeader"
 
 export const dynamic = "force-dynamic"
 
@@ -27,21 +27,27 @@ export default async function DouzePage({ params }: { params: Promise<{ code: st
     .limit(1)
   if (me.length === 0) redirect(`/join?code=${code}`)
 
+  const allVoters = await db.select().from(voters).where(eq(voters.roomCode, code))
   const myDouze = await db.select().from(douze).where(eq(douze.voterId, me[0].id))
   const myVotes = await db.select().from(votes).where(eq(votes.voterId, me[0].id))
+  const hostToken = await getHostToken(code)
+  const isHost = hostToken === room[0].hostToken
 
   const { lang, t } = await getT()
 
   return (
     <main className="min-h-dvh pb-32">
-      <header className="sticky top-0 z-30 backdrop-blur-md bg-black/40 border-b border-white/10">
-        <div className="safe-x py-2.5 max-w-2xl mx-auto flex items-center gap-3">
-          <Link href={`/r/${code}`} className="text-white/85 hover:text-white text-base font-bold shrink-0 leading-none">
-            vienna<span className="text-[color:var(--pink)]">26</span>
-          </Link>
-          <span className="font-mono text-sm tracking-widest text-white/80 ml-auto">{code}</span>
-        </div>
-      </header>
+      <RoomHeader
+        roomCode={code}
+        roomName={room[0].name}
+        meId={me[0].id}
+        meName={me[0].displayName}
+        voters={allVoters.map((v) => ({ id: v.id, displayName: v.displayName }))}
+        isHost={isHost}
+        douzeOpen={true}
+        realResultsReady={!!room[0].realResults}
+        lang={lang}
+      />
 
       <section className="safe-x pt-5 max-w-2xl mx-auto space-y-5">
         <div className="space-y-1.5">
