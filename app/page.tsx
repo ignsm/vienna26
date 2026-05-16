@@ -1,7 +1,6 @@
 import Link from "next/link"
 import { getT } from "@/lib/i18n/server"
 import { RecentRoomsList } from "@/components/RecentRoomsList"
-import { MadeAt } from "@/components/MadeAt"
 import { createSoloRoom } from "@/lib/actions/rooms"
 
 export default async function HomePage() {
@@ -40,8 +39,6 @@ export default async function HomePage() {
       <Link href="/global" className="text-white/40 hover:text-white text-xs underline underline-offset-2">
         Global leaderboard →
       </Link>
-
-      <MadeAt className="mt-auto" />
     </main>
   )
 }

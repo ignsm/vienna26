@@ -5,6 +5,7 @@ import { getVoterToken } from "@/lib/auth"
 import { getT } from "@/lib/i18n/server"
 import { CONTESTANTS, getContestant } from "@/lib/contestants"
 import { spearman, topKHitRate } from "@/lib/scoring"
+import { TipJar } from "@/components/TipJar"
 import Link from "next/link"
 
 export const dynamic = "force-dynamic"
@@ -163,6 +164,16 @@ export default async function VsRealityPage({ params }: { params: Promise<{ code
             </details>
           </section>
         )}
+
+        <TipJar
+          labels={{
+            title: t("tip.title"),
+            coffee: t("tip.coffee"),
+            share: t("tip.share"),
+            shareText: t("tip.share_text"),
+            copied: t("tip.copied"),
+          }}
+        />
       </div>
     </main>
   )

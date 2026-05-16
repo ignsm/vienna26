@@ -91,6 +91,12 @@ const en: Dict = {
   "global.subtitle": "Aggregated across every vienna26 room.",
   "global.voters": "voters",
   "global.rooms": "rooms",
+
+  "tip.title": "Loved vienna26?",
+  "tip.coffee": "Buy me a coffee",
+  "tip.share": "Tell a friend",
+  "tip.share_text": "Rate Eurovision with friends on vienna26",
+  "tip.copied": "Link copied",
 }
 
 const ru: Dict = {
@@ -180,6 +186,12 @@ const ru: Dict = {
   "global.subtitle": "Сумма голосов по всем комнатам vienna26.",
   "global.voters": "голосующих",
   "global.rooms": "комнат",
+
+  "tip.title": "Понравилось?",
+  "tip.coffee": "Угостить кофе",
+  "tip.share": "Позвать друга",
+  "tip.share_text": "Оцениваем Евровидение с друзьями на vienna26",
+  "tip.copied": "Ссылка скопирована",
 }
 
 export const dict: Record<Lang, Dict> = { en, ru }

@@ -3,7 +3,6 @@ import { getT } from "@/lib/i18n/server"
 import { getContestant } from "@/lib/contestants"
 import { leaderboard, type Aggregate } from "@/lib/scoring"
 import { PollingRefresh } from "@/components/PollingRefresh"
-import { MadeAt } from "@/components/MadeAt"
 import Link from "next/link"
 
 export const dynamic = "force-dynamic"
@@ -138,10 +137,6 @@ export default async function GlobalPage() {
             </section>
           </>
         )}
-
-        <div className="text-center pt-6">
-          <MadeAt />
-        </div>
       </div>
     </main>
   )
