@@ -1,7 +1,7 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import { aggregate, leaderboard, spearman, topKHitRate } from "../lib/scoring.ts"
-import type { Vote, Douze } from "../lib/db/schema.ts"
+import { aggregate, leaderboard, spearman, topKHitRate } from "../lib/scoring"
+import type { Vote, Douze } from "../lib/db/schema"
 
 const baseVoteFields = {
   id: "v1",

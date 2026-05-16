@@ -1,4 +1,5 @@
 import Link from "next/link"
+import type { Route } from "next"
 import { IconStar, IconChart, IconTrophy } from "@/components/icons"
 
 type Tab = "vote" | "results" | "douze"
@@ -34,20 +35,20 @@ export function RoomTabBar({
   lang,
 }: Props) {
   const c = COPY[lang]
-  const tabs: { id: Tab; href: string; label: string; badge?: string }[] = [
+  const tabs: { id: Tab; href: Route; label: string; badge?: string }[] = [
     {
       id: "vote",
-      href: `/r/${roomCode}`,
+      href: `/r/${roomCode}` as Route,
       label: c.vote,
       badge: votesCount > 0 ? `${votesCount}/${totalActs}` : undefined,
     },
     {
       id: "douze",
-      href: `/r/${roomCode}/douze`,
+      href: `/r/${roomCode}/douze` as Route,
       label: c.douze,
       badge: douzeSubmitted ? "✓" : douzePicks > 0 ? `${douzePicks}/10` : undefined,
     },
-    { id: "results", href: `/r/${roomCode}/results`, label: c.results },
+    { id: "results", href: `/r/${roomCode}/results` as Route, label: c.results },
   ]
 
   return (
