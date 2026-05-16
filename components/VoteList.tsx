@@ -39,12 +39,13 @@ const AXIS_LABELS_RU: Record<Axis, string> = {
   hotness: "Секс.",
 }
 
-const EMOJI_BUCKETS: { emoji: string; value: number; labelEn: string; labelRu: string }[] = [
-  { emoji: "💀", value: 2, labelEn: "Nope", labelRu: "Мимо" },
-  { emoji: "😐", value: 4, labelEn: "Meh", labelRu: "Так себе" },
-  { emoji: "🙂", value: 6, labelEn: "Good", labelRu: "Норм" },
-  { emoji: "🤩", value: 8, labelEn: "Great", labelRu: "Огонь" },
-  { emoji: "🔥", value: 10, labelEn: "Iconic", labelRu: "Икона" },
+type Bucket = { value: number; labelEn: string; labelRu: string; emoji: string; accent: string }
+const BUCKETS: Bucket[] = [
+  { value: 10, labelEn: "Iconic", labelRu: "Икона", emoji: "🔥", accent: "from-[color:var(--pink)] to-[color:var(--hotpink)]" },
+  { value: 8, labelEn: "Great", labelRu: "Огонь", emoji: "🤩", accent: "from-fuchsia-500 to-pink-500" },
+  { value: 6, labelEn: "Good", labelRu: "Норм", emoji: "🙂", accent: "from-violet-500 to-fuchsia-500" },
+  { value: 4, labelEn: "Meh", labelRu: "Так себе", emoji: "😐", accent: "from-indigo-500 to-violet-500" },
+  { value: 2, labelEn: "Nope", labelRu: "Мимо", emoji: "💀", accent: "from-slate-600 to-indigo-700" },
 ]
 
 const lsKey = (room: string, id: number) => `v26:${room}:${id}`
@@ -61,6 +62,7 @@ export function VoteList({ roomCode, contestants, initialVotes }: Props) {
 
   const [cursor, setCursor] = useState(0)
   const [tweakOpen, setTweakOpen] = useState(false)
+  const [jumpOpen, setJumpOpen] = useState(false)
   const [online, setOnline] = useState(true)
   const [, startTransition] = useTransition()
   const [lang, setLang] = useState<"en" | "ru">("en")
@@ -81,9 +83,7 @@ export function VoteList({ roomCode, contestants, initialVotes }: Props) {
             const parsed = JSON.parse(raw) as VoteState
             const localCount = AXES.filter((a) => parsed[a] !== undefined).length
             const serverCount = AXES.filter((a) => next[c.id]?.[a] !== undefined).length
-            if (localCount > serverCount) {
-              next[c.id] = parsed
-            }
+            if (localCount > serverCount) next[c.id] = parsed
           }
         } catch {}
       }
@@ -107,9 +107,7 @@ export function VoteList({ roomCode, contestants, initialVotes }: Props) {
   }, [roomCode, contestants])
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem(lsCursorKey(roomCode), String(cursor))
-    }
+    if (typeof window !== "undefined") localStorage.setItem(lsCursorKey(roomCode), String(cursor))
   }, [cursor, roomCode])
 
   const current = contestants[cursor]
@@ -117,11 +115,7 @@ export function VoteList({ roomCode, contestants, initialVotes }: Props) {
   const isCurrentDone = AXES.every((a) => currentVote[a] !== undefined)
 
   const advanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  useEffect(() => {
-    return () => {
-      if (advanceTimer.current) clearTimeout(advanceTimer.current)
-    }
-  }, [])
+  useEffect(() => () => { if (advanceTimer.current) clearTimeout(advanceTimer.current) }, [])
 
   const syncToServer = useCallback(
     (id: number, v: VoteState) => {
@@ -147,23 +141,15 @@ export function VoteList({ roomCode, contestants, initialVotes }: Props) {
 
   const setPrimary = useCallback(
     (value: number) => {
-      const nextVote: VoteState = {
-        vocal: value,
-        performance: value,
-        song: value,
-        hotness: value,
-      }
+      const nextVote: VoteState = { vocal: value, performance: value, song: value, hotness: value }
       setVotes((prev) => ({ ...prev, [current.id]: nextVote }))
-      try {
-        localStorage.setItem(lsKey(roomCode, current.id), JSON.stringify(nextVote))
-      } catch {}
+      try { localStorage.setItem(lsKey(roomCode, current.id), JSON.stringify(nextVote)) } catch {}
       syncToServer(current.id, nextVote)
-
       if (!tweakOpen) {
         if (advanceTimer.current) clearTimeout(advanceTimer.current)
         advanceTimer.current = setTimeout(() => {
           setCursor((c) => Math.min(contestants.length - 1, c + 1))
-        }, 450)
+        }, 500)
       }
     },
     [current.id, roomCode, syncToServer, tweakOpen, contestants.length],
@@ -173,9 +159,7 @@ export function VoteList({ roomCode, contestants, initialVotes }: Props) {
     (axis: Axis, value: number) => {
       const nextVote: VoteState = { ...currentVote, [axis]: value }
       setVotes((prev) => ({ ...prev, [current.id]: nextVote }))
-      try {
-        localStorage.setItem(lsKey(roomCode, current.id), JSON.stringify(nextVote))
-      } catch {}
+      try { localStorage.setItem(lsKey(roomCode, current.id), JSON.stringify(nextVote)) } catch {}
       syncToServer(current.id, nextVote)
     },
     [current.id, currentVote, roomCode, syncToServer],
@@ -191,12 +175,8 @@ export function VoteList({ roomCode, contestants, initialVotes }: Props) {
           if (AXES.every((a) => v[a] !== undefined)) {
             try {
               await castVote({
-                roomCode,
-                contestantId: c.id,
-                vocal: v.vocal!,
-                performance: v.performance!,
-                song: v.song!,
-                hotness: v.hotness!,
+                roomCode, contestantId: c.id,
+                vocal: v.vocal!, performance: v.performance!, song: v.song!, hotness: v.hotness!,
               })
             } catch {}
           }
@@ -211,7 +191,6 @@ export function VoteList({ roomCode, contestants, initialVotes }: Props) {
     return v ? AXES.every((a) => v[a] !== undefined) : false
   }
 
-  // Primary "feel" — the bucket that matches the current avg if all axes equal.
   const primaryDisplay =
     currentVote.vocal !== undefined &&
     currentVote.performance !== undefined &&
@@ -229,116 +208,158 @@ export function VoteList({ roomCode, contestants, initialVotes }: Props) {
   return (
     <div className="space-y-4">
       {!online && (
-        <div className="text-center text-xs text-[color:var(--gold)] bg-black/40 rounded-pill px-3 py-1.5">
+        <div className="text-center text-xs text-[color:var(--gold)] bg-black/40 rounded-full px-3 py-1.5">
           offline — saving locally, will sync
         </div>
       )}
 
-      <article className="card-light shadow-2xl">
-        <div className="flex items-start gap-3 mb-5">
-          <span className="text-5xl leading-none shrink-0" aria-hidden>
-            {current.flag}
-          </span>
+      <article className="rounded-3xl bg-white text-black shadow-2xl overflow-hidden">
+        {/* Contestant header */}
+        <div className="p-4 md:p-5 flex items-center gap-3 border-b border-black/[0.05]">
+          <span className="text-5xl leading-none shrink-0" aria-hidden>{current.flag}</span>
           <div className="flex-1 min-w-0">
-            <p className="text-[11px] text-black/50 uppercase tracking-widest">
+            <p className="text-[10px] text-black/45 uppercase tracking-widest">
               {String(current.id).padStart(2, "0")} / {String(contestants.length).padStart(2, "0")} · {current.country}
             </p>
-            <h3 className="headline-lg text-xl mt-0.5 leading-tight">{current.artist}</h3>
-            <p className="italic text-black/55 text-sm">{current.song}</p>
+            <h3 className="font-bold text-lg leading-tight truncate">{current.artist}</h3>
+            <p className="italic text-black/55 text-sm truncate">{current.song}</p>
           </div>
           {isCurrentDone && (
-            <span className="rounded-full bg-[color:var(--pink)] text-white text-xs px-2 py-0.5 shrink-0 font-bold">✓</span>
+            <span className="rounded-full bg-[color:var(--pink)] text-white text-xs px-2.5 py-1 shrink-0 font-bold leading-none">✓</span>
           )}
         </div>
 
-        {/* Primary feel — 5 large emoji buckets */}
-        <div className="grid grid-cols-5 gap-2">
-          {EMOJI_BUCKETS.map((b) => {
-            const isSelected = primaryDisplay === b.value
-            return (
-              <button
-                key={b.value}
-                onClick={() => setPrimary(b.value)}
-                className={`flex flex-col items-center justify-center gap-0.5 aspect-square rounded-2xl transition active:scale-95 ${
-                  isSelected
-                    ? "bg-[color:var(--pink)] text-white shadow-lg shadow-[color:var(--pink)]/40 scale-105"
-                    : "bg-black/[0.04] hover:bg-black/[0.08]"
-                }`}
-                aria-label={`Score ${b.value}`}
-              >
-                <span className="text-3xl leading-none">{b.emoji}</span>
-                <span className={`text-[10px] font-bold uppercase tracking-wide leading-none ${isSelected ? "text-white" : "text-black/55"}`}>
-                  {lang === "ru" ? b.labelRu : b.labelEn}
-                </span>
-              </button>
-            )
-          })}
+        {/* Scoring area — either the 5-bucket primary OR the 4-axis detail view, not both */}
+        <div className="p-3 md:p-4 space-y-2">
+          {!tweakOpen && (
+            <>
+              {BUCKETS.map((b) => {
+                const isSelected = primaryDisplay === b.value
+                return (
+                  <button
+                    key={b.value}
+                    onClick={() => setPrimary(b.value)}
+                    className={`group relative w-full h-14 rounded-2xl flex items-center gap-3 px-4 transition active:scale-[0.985] ${
+                      isSelected
+                        ? `bg-gradient-to-r ${b.accent} text-white shadow-lg`
+                        : "bg-black/[0.04] hover:bg-black/[0.08] text-black"
+                    }`}
+                    aria-label={lang === "ru" ? b.labelRu : b.labelEn}
+                  >
+                    <span className="text-2xl leading-none shrink-0" aria-hidden>{b.emoji}</span>
+                    <span className="flex-1 text-left font-bold text-base leading-tight">
+                      {lang === "ru" ? b.labelRu : b.labelEn}
+                    </span>
+                    <span
+                      className={`text-sm font-mono tabular-nums shrink-0 ${
+                        isSelected ? "text-white/85" : "text-black/40"
+                      }`}
+                    >
+                      {b.value}
+                    </span>
+                  </button>
+                )
+              })}
+            </>
+          )}
+
+          {tweakOpen && (
+            <div className="space-y-4">
+              {AXES.map((axis) => (
+                <AxisRow
+                  key={axis}
+                  label={labels[axis]}
+                  value={currentVote[axis]}
+                  onSelect={(v) => setAxis(axis, v)}
+                  lang={lang}
+                />
+              ))}
+            </div>
+          )}
+
+          <button
+            onClick={() => setTweakOpen((v) => !v)}
+            className="mt-3 w-full text-center text-xs text-black/45 hover:text-black/75 underline underline-offset-2 py-1"
+          >
+            {tweakOpen
+              ? lang === "ru" ? "← Назад к общей оценке" : "← Back to overall"
+              : lang === "ru" ? "Оценить отдельно: вокал / шоу / песня / секс" : "Rate axes separately"}
+          </button>
         </div>
-
-        <button
-          onClick={() => setTweakOpen((v) => !v)}
-          className="mt-3 text-[11px] text-black/45 hover:text-black/75 underline underline-offset-2"
-        >
-          {tweakOpen
-            ? lang === "ru"
-              ? "▾ свернуть"
-              : "▾ collapse"
-            : lang === "ru"
-              ? "▸ оценить детально"
-              : "▸ rate axes individually"}
-        </button>
-
-        {tweakOpen && (
-          <div className="mt-3 space-y-2.5">
-            {AXES.map((axis) => (
-              <AxisRow
-                key={axis}
-                label={labels[axis]}
-                value={currentVote[axis]}
-                onSelect={(v) => setAxis(axis, v)}
-              />
-            ))}
-          </div>
-        )}
       </article>
 
-      {/* Pagination */}
-      <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2">
+      {/* Pagination — prev / counter / next. Counter taps to open jump grid */}
+      <div className="flex items-center gap-3">
         <button
           onClick={goPrev}
           disabled={cursor === 0}
-          className="rounded-full bg-white/10 hover:bg-white/20 text-white disabled:opacity-30 w-11 h-11 flex items-center justify-center text-lg"
-          aria-label="Previous"
+          className="rounded-full bg-white/10 hover:bg-white/20 active:bg-white/30 text-white disabled:opacity-30 w-12 h-12 flex items-center justify-center text-xl transition shrink-0"
+          aria-label="Previous act"
         >
           ←
         </button>
-        <div className="flex gap-1 overflow-x-auto py-1 px-1 snap-x">
-          {contestants.map((c, i) => (
-            <button
-              key={c.id}
-              onClick={() => setCursor(i)}
-              className={`shrink-0 snap-center w-7 h-7 rounded-full text-[11px] font-mono transition ${
-                i === cursor
-                  ? "bg-white text-black ring-2 ring-[color:var(--pink)] font-bold"
-                  : isDone(c.id)
-                    ? "bg-[color:var(--pink)]/80 text-white"
-                    : "bg-white/15 text-white/70 hover:bg-white/25"
-              }`}
-              aria-label={`${c.country} (${c.id})`}
-            >
-              {c.id}
-            </button>
-          ))}
-        </div>
+        <button
+          onClick={() => setJumpOpen(true)}
+          className="flex-1 h-12 rounded-full bg-white/10 hover:bg-white/15 text-white text-sm font-medium transition flex items-center justify-center gap-2 px-3"
+          aria-label="Jump to act"
+        >
+          <span className="text-white/55 text-xs">
+            {lang === "ru" ? "Номер" : "Act"}
+          </span>
+          <span className="font-mono tabular-nums font-bold">
+            {cursor + 1} / {contestants.length}
+          </span>
+          <span className="text-white/40 text-xs">▾</span>
+        </button>
         <button
           onClick={goNext}
           disabled={cursor === contestants.length - 1}
-          className="rounded-full bg-white/10 hover:bg-white/20 text-white disabled:opacity-30 w-11 h-11 flex items-center justify-center text-lg"
-          aria-label="Next"
+          className="rounded-full bg-[color:var(--pink)] hover:brightness-110 text-white disabled:opacity-30 w-12 h-12 flex items-center justify-center text-xl transition shrink-0 shadow-md shadow-[color:var(--pink)]/30"
+          aria-label="Next act"
         >
           →
         </button>
       </div>
+
+      {/* Jump-to grid modal */}
+      {jumpOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-4"
+          onClick={() => setJumpOpen(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-3xl bg-black/95 border border-white/15 p-4 max-h-[80dvh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="font-bold text-white">
+                {lang === "ru" ? "Перейти к номеру" : "Jump to act"}
+              </h4>
+              <button onClick={() => setJumpOpen(false)} className="text-white/60 hover:text-white text-sm">✕</button>
+            </div>
+            <div className="grid grid-cols-2 gap-1.5">
+              {contestants.map((c, i) => (
+                <button
+                  key={c.id}
+                  onClick={() => { setCursor(i); setJumpOpen(false) }}
+                  className={`flex items-center gap-2 px-2.5 py-2 rounded-xl text-left transition ${
+                    i === cursor
+                      ? "bg-white text-black"
+                      : isDone(c.id)
+                        ? "bg-[color:var(--pink)]/25 text-white border border-[color:var(--pink)]/40"
+                        : "bg-white/5 text-white/85 hover:bg-white/10"
+                  }`}
+                >
+                  <span className="font-mono text-[11px] tabular-nums w-5 shrink-0 opacity-70">{c.id}</span>
+                  <span className="text-base shrink-0">{c.flag}</span>
+                  <span className="text-xs truncate">{c.country}</span>
+                  {isDone(c.id) && i !== cursor && <span className="ml-auto text-[color:var(--pink)] text-xs">✓</span>}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -347,28 +368,30 @@ function AxisRow({
   label,
   value,
   onSelect,
+  lang,
 }: {
   label: string
   value: number | undefined
   onSelect: (v: number) => void
+  lang: "en" | "ru"
 }) {
   return (
     <div>
-      <div className="flex items-center justify-between mb-1">
-        <span className="text-xs font-medium text-black/70">{label}</span>
-        <span className="text-xs font-mono tabular-nums w-6 text-right">{value === undefined ? "·" : value}</span>
+      <div className="flex items-center justify-between mb-1.5">
+        <span className="text-xs font-semibold text-black/70">{label}</span>
+        <span className="text-xs font-mono tabular-nums text-black/55">{value === undefined ? "·" : value}</span>
       </div>
-      <div className="grid grid-cols-5 gap-1">
-        {EMOJI_BUCKETS.map((b) => (
+      <div className="grid grid-cols-5 gap-1.5">
+        {BUCKETS.slice().reverse().map((b) => (
           <button
             key={b.value}
             onClick={() => onSelect(b.value)}
-            className={`h-9 rounded-lg text-xs font-medium transition flex items-center justify-center gap-1 ${
+            className={`h-10 rounded-xl text-xs font-medium transition flex items-center justify-center ${
               value === b.value
-                ? "bg-[color:var(--pink)] text-white"
+                ? "bg-[color:var(--pink)] text-white shadow-md"
                 : "bg-black/[0.04] hover:bg-black/[0.08] text-black/65"
             }`}
-            aria-label={`${label} ${b.value}`}
+            aria-label={`${label} ${b.value} ${lang === "ru" ? b.labelRu : b.labelEn}`}
           >
             <span className="text-base leading-none">{b.emoji}</span>
           </button>
