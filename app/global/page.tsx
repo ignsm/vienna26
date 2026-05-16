@@ -2,6 +2,7 @@ import { db, votes, douze, voters, rooms } from "@/lib/db"
 import { getT } from "@/lib/i18n/server"
 import { getContestant } from "@/lib/contestants"
 import { leaderboard, type Aggregate } from "@/lib/scoring"
+import { isRealResultsReady } from "@/lib/real-results"
 import { PollingRefresh } from "@/components/PollingRefresh"
 import Link from "next/link"
 
@@ -33,6 +34,14 @@ export default async function GlobalPage() {
           <Link href="/" className="text-white/70 hover:text-white text-sm font-medium">
             ← vienna<span className="text-[color:var(--pink)]">26</span>
           </Link>
+          {isRealResultsReady() && (
+            <Link
+              href="/global/vs-reality"
+              className="inline-flex items-center gap-1.5 rounded-full bg-[color:var(--gold)]/15 hover:bg-[color:var(--gold)]/25 border border-[color:var(--gold)]/40 px-3 py-1.5 text-[color:var(--gold)] text-xs font-medium transition"
+            >
+              {lang === "ru" ? "vs Реальность" : "vs Reality"} →
+            </Link>
+          )}
         </header>
 
         <div className="space-y-1">
