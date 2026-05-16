@@ -29,29 +29,14 @@ body {
   font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   -webkit-font-smoothing: antialiased;
-  background: var(--mid-blue); /* fallback under the fixed gradient layer */
-  position: relative;
-}
-
-/*
-  Gradient as a fixed pseudo-element so it stays put on scroll without
-  forcing background-attachment: fixed on body (which historically breaks
-  iOS Safari momentum scroll and creates oddly clipped scroll contexts).
-*/
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
   background: radial-gradient(
     120% 150% at 90% -3%,
-    var(--indigo),
-    var(--deep-blue) 22.49%,
-    var(--mid-blue) 33.26% 64.14%,
-    var(--purple) 85.82%,
-    var(--hotpink)
-  );
+    #20f,
+    #000c54 22.49%,
+    #010a41 33.26% 64.14%,
+    #4c0a54 85.82%,
+    #ff0178
+  ) 0 0 / cover fixed;
 }
 
 @layer utilities {

@@ -10,6 +10,7 @@ import { RoomTabBar } from "@/components/RoomTabBar"
 import { ProgressStrip } from "@/components/ProgressStrip"
 import { RecentRoomsTracker } from "@/components/RecentRoomsTracker"
 import { RoundBanner } from "@/components/RoundBanner"
+import { Onboarding } from "@/components/Onboarding"
 
 export const dynamic = "force-dynamic"
 
@@ -41,6 +42,7 @@ export default async function RoomPage({ params }: { params: Promise<{ code: str
   return (
     <main className="min-h-dvh pb-32">
       <RecentRoomsTracker code={code} roomName={room[0].name ?? null} meDisplayName={me[0].displayName} />
+      <Onboarding lang={lang} />
       <RoomHeader
         roomCode={code}
         roomName={room[0].name}

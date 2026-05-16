@@ -39,13 +39,20 @@ const AXIS_LABELS_RU: Record<Axis, string> = {
   hotness: "Секс.",
 }
 
-type Bucket = { value: number; labelEn: string; labelRu: string; emoji: string; accent: string }
+type Bucket = {
+  value: number       // internal 0-10 score (we keep 4 axes × 10 max for the math)
+  display: number     // friendly 1-5 shown to user
+  labelEn: string
+  labelRu: string
+  emoji: string
+  accent: string
+}
 const BUCKETS: Bucket[] = [
-  { value: 10, labelEn: "Iconic", labelRu: "Икона", emoji: "🔥", accent: "from-[color:var(--pink)] to-[color:var(--hotpink)]" },
-  { value: 8, labelEn: "Great", labelRu: "Огонь", emoji: "🤩", accent: "from-fuchsia-500 to-pink-500" },
-  { value: 6, labelEn: "Good", labelRu: "Норм", emoji: "🙂", accent: "from-violet-500 to-fuchsia-500" },
-  { value: 4, labelEn: "Meh", labelRu: "Так себе", emoji: "😐", accent: "from-indigo-500 to-violet-500" },
-  { value: 2, labelEn: "Nope", labelRu: "Мимо", emoji: "💀", accent: "from-slate-600 to-indigo-700" },
+  { value: 10, display: 5, labelEn: "Iconic", labelRu: "Икона", emoji: "🔥", accent: "from-[color:var(--pink)] to-[color:var(--hotpink)]" },
+  { value: 8, display: 4, labelEn: "Great", labelRu: "Огонь", emoji: "🤩", accent: "from-fuchsia-500 to-pink-500" },
+  { value: 6, display: 3, labelEn: "Good", labelRu: "Норм", emoji: "🙂", accent: "from-violet-500 to-fuchsia-500" },
+  { value: 4, display: 2, labelEn: "Meh", labelRu: "Так себе", emoji: "😐", accent: "from-indigo-500 to-violet-500" },
+  { value: 2, display: 1, labelEn: "Nope", labelRu: "Мимо", emoji: "💀", accent: "from-slate-600 to-indigo-700" },
 ]
 
 const lsKey = (room: string, id: number) => `v26:${room}:${id}`
@@ -276,11 +283,11 @@ export function VoteList({ roomCode, contestants, initialVotes }: Props) {
                       {lang === "ru" ? b.labelRu : b.labelEn}
                     </span>
                     <span
-                      className={`text-sm font-mono tabular-nums shrink-0 ${
-                        isSelected ? "text-white/85" : "text-black/40"
+                      className={`text-base font-bold tabular-nums shrink-0 w-7 text-center ${
+                        isSelected ? "text-white" : "text-black/45"
                       }`}
                     >
-                      {b.value}
+                      {b.display}
                     </span>
                   </button>
                 )
@@ -395,21 +402,24 @@ function AxisRow({
     <div>
       <div className="flex items-center justify-between mb-1.5">
         <span className="text-xs font-semibold text-black/70">{label}</span>
-        <span className="text-xs font-mono tabular-nums text-black/55">{value === undefined ? "·" : value}</span>
+        <span className="text-xs font-mono tabular-nums text-black/55">
+          {value === undefined ? "·" : BUCKETS.find((b) => b.value === value)?.display ?? value}
+        </span>
       </div>
       <div className="grid grid-cols-5 gap-1.5">
         {BUCKETS.slice().reverse().map((b) => (
           <button
             key={b.value}
             onClick={() => onSelect(b.value)}
-            className={`h-10 rounded-xl text-xs font-medium transition flex items-center justify-center ${
+            className={`h-11 rounded-xl text-xs font-medium transition flex flex-col items-center justify-center gap-0.5 ${
               value === b.value
                 ? "bg-[color:var(--pink)] text-white shadow-md"
                 : "bg-black/[0.04] hover:bg-black/[0.08] text-black/65"
             }`}
-            aria-label={`${label} ${b.value} ${lang === "ru" ? b.labelRu : b.labelEn}`}
+            aria-label={`${label} ${b.display} ${lang === "ru" ? b.labelRu : b.labelEn}`}
           >
             <span className="text-base leading-none">{b.emoji}</span>
+            <span className="text-[9px] font-bold leading-none opacity-80">{b.display}</span>
           </button>
         ))}
       </div>
