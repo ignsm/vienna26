@@ -3,17 +3,16 @@ import type { Vote, Douze } from "@/lib/db/schema"
 /**
  * Per-contestant aggregates and final score.
  *
- * base       avg of (vocal+performance+song+hotness)/4 across voters who scored this act    0..10
- * voteCount  how many jurors gave any per-act score to this contestant
- * raw        sum of all per-act scores. equals base * 4 * voteCount, but stored explicitly. larger when more jurors voted
- * douze      sum of douze points across jurors                                              0..(jurors * 12)
- * total      raw/4 + douze    — i.e. (base * voteCount) + douze
+ * Eurovision-style: total is only the sum of 12-point picks across jurors.
+ * Per-act ratings (Rate) drive the bonus rankings and the auto-fill suggestion,
+ * but do NOT add to total. This mirrors how the real contest scores: only the
+ * 12/10/8/.../1 distribution from each jury counts toward the winner.
  *
- * Why this total: breadth + depth.
- *   - A country rated 7 by 6 jurors → base 7, total ≥ 42 — broad appeal counts.
- *   - A country rated 10 by 1 juror → base 10, total = 10 — narrow love doesn't dominate.
- *   - A 12-point pick gives a juror 12 points to the act they loved → real signal, not magic constants.
- * douze and per-act stay roughly comparable in magnitude per juror (each juror contributes up to 10 base + up to 12 douze).
+ * base         avg of (vocal+performance+song+hotness)/4 across jurors who rated this act    0..10
+ * voteCount    how many jurors gave a per-act rating to this contestant
+ * douzeVoters  how many jurors put this contestant in their 12-point top-10
+ * douze        sum of 12-point picks across jurors                                           0..(jurors * 12)
+ * total        = douze
  */
 
 export type Aggregate = {
@@ -24,8 +23,8 @@ export type Aggregate = {
   hotness: number
   base: number
   voteCount: number
-  raw: number
   douze: number
+  douzeVoters: number
   total: number
 }
 
@@ -43,8 +42,8 @@ export function aggregate(votes: Vote[], douzeRows: Douze[]): Map<number, Aggreg
         hotness: 0,
         base: 0,
         voteCount: 0,
-        raw: 0,
         douze: 0,
+        douzeVoters: 0,
         total: 0,
       }
       byContestant.set(id, agg)
@@ -62,7 +61,6 @@ export function aggregate(votes: Vote[], douzeRows: Douze[]): Map<number, Aggreg
   }
 
   for (const [, a] of byContestant) {
-    a.raw = a.vocal + a.performance + a.song + a.hotness // pre-average sum across all jurors, all axes
     if (a.voteCount > 0) {
       a.vocal /= a.voteCount
       a.performance /= a.voteCount
@@ -75,10 +73,12 @@ export function aggregate(votes: Vote[], douzeRows: Douze[]): Map<number, Aggreg
   for (const d of douzeRows) {
     const a = ensure(d.contestantId)
     a.douze += d.points
+    a.douzeVoters += 1
   }
 
+  // Eurovision-style: only 12-point picks drive the leaderboard total.
   for (const [, a] of byContestant) {
-    a.total = a.raw / 4 + a.douze
+    a.total = a.douze
   }
 
   return byContestant

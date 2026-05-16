@@ -52,43 +52,46 @@ test("aggregate sums douze points across voters", () => {
   assert.equal(agg.get(2)!.douze, 10)
 })
 
-test("aggregate total = raw/4 + douze = base*voteCount + douze", () => {
+test("aggregate total = sum of 12-points only (Eurovision style)", () => {
   const votes: Vote[] = [mkVote("a", 1, 8, 8, 8, 8)]
   const douze: Douze[] = [mkDouze("a", 1, 12)]
   const agg = aggregate(votes, douze)
   const c1 = agg.get(1)!
-  assert.equal(c1.base, 8)
+  assert.equal(c1.base, 8) // per-act average still tracked for bonus rankings
   assert.equal(c1.voteCount, 1)
   assert.equal(c1.douze, 12)
-  assert.equal(c1.total, 8 * 1 + 12) // 20 — narrow love doesn't dominate
+  assert.equal(c1.douzeVoters, 1)
+  assert.equal(c1.total, 12) // total is JUST douze
 })
 
-test("breadth beats narrow love: 6 votes of 7 beats 1 vote of 10", () => {
-  // Contestant A: 6 jurors, all giving 7 across all axes; no douze
+test("per-act ratings do not affect total", () => {
+  // Contestant A: rated 9 by 6 jurors but NO douze
   const votesA: Vote[] = Array.from({ length: 6 }, (_, i) =>
-    mkVote(`u${i}`, 1, 7, 7, 7, 7),
+    mkVote(`u${i}`, 1, 9, 9, 9, 9),
   )
-  // Contestant B: 1 juror, gives 10 across all axes; no douze
-  const votesB: Vote[] = [mkVote("u0", 2, 10, 10, 10, 10)]
+  // Contestant B: rated 0, but two jurors gave 12 douze
+  const votesB: Vote[] = [mkVote("u0", 2, 0, 0, 0, 0)]
+  const douzeB: Douze[] = [mkDouze("u0", 2, 12), mkDouze("u1", 2, 10)]
 
   const aggA = aggregate(votesA, []).get(1)!
-  const aggB = aggregate(votesB, []).get(2)!
-  assert.equal(aggA.base, 7)
-  assert.equal(aggA.voteCount, 6)
-  assert.equal(aggA.total, 42)
-  assert.equal(aggB.base, 10)
-  assert.equal(aggB.voteCount, 1)
-  assert.equal(aggB.total, 10)
-  assert.ok(aggA.total > aggB.total)
+  const aggB = aggregate(votesB, douzeB).get(2)!
+  assert.equal(aggA.total, 0) // no douze → no total, even with great ratings
+  assert.equal(aggB.total, 22) // 12 + 10
+  assert.ok(aggB.total > aggA.total)
 })
 
-test("leaderboard sorts by total desc", () => {
+test("leaderboard sorts by total desc (douze-driven)", () => {
   const votes: Vote[] = [
     mkVote("a", 1, 5, 5, 5, 5),
     mkVote("a", 2, 8, 8, 8, 8),
     mkVote("a", 3, 7, 7, 7, 7),
   ]
-  const board = leaderboard(votes, [])
+  const douze: Douze[] = [
+    mkDouze("a", 2, 12),
+    mkDouze("a", 3, 10),
+    mkDouze("a", 1, 8),
+  ]
+  const board = leaderboard(votes, douze)
   assert.deepEqual(
     board.map((r) => r.contestantId),
     [2, 3, 1],

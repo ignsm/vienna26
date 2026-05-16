@@ -78,7 +78,8 @@ export function DouzePicker({ roomCode, contestants, initialPicks, myRatings = [
     setError(null)
   }
 
-  const canAutoFill = myRatings.length > 0
+  // Only allow auto-fill once user has rated EVERY act — partial rate ranking is misleading
+  const canAutoFill = myRatings.length >= contestants.length
 
   const onSubmit = () => {
     if (!complete) return

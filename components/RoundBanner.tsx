@@ -26,9 +26,6 @@ export function RoundBanner({ roomCode, mySubmittedDouze, myVotesCount, totalAct
         <p className="text-[color:var(--gold)] font-bold text-sm md:text-base">
           ✓ {lang === "ru" ? "12 баллов отправлены · смотри лидерборд" : "12 points submitted · see leaderboard"} →
         </p>
-        <p className="text-white/65 text-xs mt-0.5">
-          {lang === "ru" ? "Оценки за номера можно править дальше." : "You can still tweak per-act scores."}
-        </p>
       </Link>
     )
   }

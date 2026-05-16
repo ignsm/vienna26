@@ -8,14 +8,14 @@ import { IconClose } from "@/components/icons"
 type Criterion = "total" | "hotness" | "vocal" | "performance" | "song"
 
 const CRITERIA_EN: { id: Criterion; label: string; hint: string }[] = [
-  { id: "total", label: "Total score", hint: "ratings × jurors + 12-points" },
+  { id: "total", label: "Total score", hint: "sum of 12-points from all jurors" },
   { id: "vocal", label: "Best vocal", hint: "avg vocal rating" },
   { id: "performance", label: "Best stage", hint: "avg stage rating" },
   { id: "song", label: "Best song", hint: "avg song rating" },
   { id: "hotness", label: "Hottest 🔥", hint: "avg sexy rating" },
 ]
 const CRITERIA_RU: { id: Criterion; label: string; hint: string }[] = [
-  { id: "total", label: "Итог", hint: "оценки × жюри + 12 баллов" },
+  { id: "total", label: "Итог", hint: "сумма 12 баллов от всех жюри" },
   { id: "vocal", label: "Лучший вокал", hint: "средний вокал" },
   { id: "performance", label: "Лучшее шоу", hint: "средняя постановка" },
   { id: "song", label: "Лучшая песня", hint: "средняя песня" },
@@ -205,6 +205,9 @@ function formatValue(criterion: Criterion, r: Aggregate): string {
 }
 
 function subline(criterion: Criterion, r: Aggregate): string {
-  if (criterion === "total") return `${r.base.toFixed(1)} × ${r.voteCount} + ${r.douze}`
-  return `${r.voteCount}v`
+  if (criterion === "total") {
+    if (r.douzeVoters === 0) return "—"
+    return `from ${r.douzeVoters} ${r.douzeVoters === 1 ? "juror" : "jurors"}`
+  }
+  return `${r.voteCount}v · avg`
 }

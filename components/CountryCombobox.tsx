@@ -56,47 +56,52 @@ export function CountryCombobox({
     setQuery("")
   }
 
-  const clear = (e: React.MouseEvent) => {
-    e.stopPropagation()
+  const clear = () => {
     onChange(null)
   }
 
   return (
     <div className="relative w-full" ref={wrapRef}>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className={`w-full h-12 rounded-xl flex items-center gap-2.5 px-3 transition border ${
+      <div
+        className={`w-full h-12 rounded-xl flex items-center transition border ${
           selected
             ? "bg-white border-black/10 text-black"
             : "bg-black/[0.04] border-dashed border-black/15 text-black/60 hover:bg-black/[0.07]"
         }`}
       >
-        {selected ? (
-          <>
-            <span className="text-xl shrink-0">{selected.flag}</span>
-            <span className="flex-1 min-w-0 text-left">
-              <span className="text-sm font-semibold text-black truncate block">{selected.country}</span>
-              <span className="text-[11px] text-black/55 truncate block">{selected.artist}</span>
-            </span>
-            <button
-              type="button"
-              onClick={clear}
-              className="text-black/35 hover:text-black/80 px-1.5 shrink-0"
-              aria-label="Clear"
-            >
-              <IconClose size={14} />
-            </button>
-          </>
-        ) : (
-          <>
-            <span className="flex-1 text-left text-sm font-medium">
-              {placeholder ?? (lang === "ru" ? "Выбери страну" : "Select country")}
-            </span>
-            <IconChevronRight size={14} className="text-black/40" />
-          </>
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="flex-1 min-w-0 h-full flex items-center gap-2.5 px-3 text-left"
+        >
+          {selected ? (
+            <>
+              <span className="text-xl shrink-0">{selected.flag}</span>
+              <span className="flex-1 min-w-0">
+                <span className="text-sm font-semibold text-black truncate block">{selected.country}</span>
+                <span className="text-[11px] text-black/55 truncate block">{selected.artist}</span>
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="flex-1 text-sm font-medium">
+                {placeholder ?? (lang === "ru" ? "Выбери страну" : "Select country")}
+              </span>
+              <IconChevronRight size={14} className="text-black/40" />
+            </>
+          )}
+        </button>
+        {selected && (
+          <button
+            type="button"
+            onClick={clear}
+            className="text-black/35 hover:text-black/80 px-3 h-full shrink-0"
+            aria-label="Clear"
+          >
+            <IconClose size={14} />
+          </button>
         )}
-      </button>
+      </div>
 
       {open && (
         <div className="absolute left-0 right-0 top-full mt-1.5 z-30 rounded-2xl bg-white border border-black/10 shadow-2xl overflow-hidden">
