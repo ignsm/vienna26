@@ -91,7 +91,11 @@ export default async function GlobalPage() {
                           {r.total.toFixed(0)}
                         </div>
                         <div className="text-[10px] text-white/40 uppercase tracking-widest">
-                          {r.base.toFixed(1)} × {r.voteCount} + {r.douze}
+                          {r.douzeVoters === 0
+                            ? "—"
+                            : lang === "ru"
+                              ? `от ${r.douzeVoters} ${r.douzeVoters === 1 ? "жюри" : "жюри"}`
+                              : `from ${r.douzeVoters} ${r.douzeVoters === 1 ? "juror" : "jurors"}`}
                         </div>
                       </div>
                     </div>
@@ -120,7 +124,11 @@ export default async function GlobalPage() {
                         <div className="text-right shrink-0">
                           <div className="text-white text-sm font-mono tabular-nums font-bold">{r.total.toFixed(0)}</div>
                           <div className="text-white/40 text-[10px]">
-                            {r.base.toFixed(1)} · {r.voteCount}v · {r.douze}
+                            {r.douzeVoters === 0
+                              ? "—"
+                              : lang === "ru"
+                                ? `от ${r.douzeVoters} ${r.douzeVoters === 1 ? "жюри" : "жюри"}`
+                                : `from ${r.douzeVoters} ${r.douzeVoters === 1 ? "juror" : "jurors"}`}
                           </div>
                         </div>
                       </div>
