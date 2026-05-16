@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Eurovision Spark tokens */
+  --pink: #ff1770;
+  --hotpink: #ff0178;
+  --deep-blue: #000c54;
+  --mid-blue: #010a41;
+  --indigo: #2200ff;
+  --purple: #4c0a54;
+  --gold: #ffd93b;
+  --white: #ffffff;
+  --black: #000000;
+  --overlay: rgba(0, 0, 0, 0.8);
+
+  --radius-pill: 9999px;
+  --radius-card: 16px;
+}
+
+html,
+body {
+  min-height: 100dvh;
+  color: var(--white);
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  background:
+    radial-gradient(
+      120% 150% at 90% -3%,
+      var(--indigo),
+      var(--deep-blue) 22.49%,
+      var(--mid-blue) 33.26% 64.14%,
+      var(--purple) 85.82%,
+      var(--hotpink)
+    )
+    0 0 / cover fixed;
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+  .pill {
+    @apply rounded-pill px-[18px] py-[11px] inline-flex items-center justify-center font-medium;
+  }
+  .pill-primary {
+    @apply pill bg-white text-black hover:bg-[color:var(--tertiary,#d9d9d9)] transition-colors;
+  }
+  .pill-outline {
+    @apply pill bg-transparent border border-white/40 text-white hover:bg-white/10 transition-colors;
+  }
+  .pill-pink {
+    @apply pill bg-[color:var(--pink)] text-white hover:brightness-110 transition;
+  }
+  .card-glass {
+    @apply rounded-2xl p-6 md:p-8 bg-black/40 backdrop-blur-sm border border-white/10;
+  }
+  .card-light {
+    @apply rounded-2xl p-6 md:p-8 bg-white text-black;
+  }
+  .headline-display {
+    font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1.05;
+  }
+  .headline-lg {
+    font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.005em;
+    line-height: 1.1;
+  }
+}
+
+/* iOS Safari: avoid 100vh overflow with toolbar */
+html,
+body {
+  overscroll-behavior-y: none;
+}
