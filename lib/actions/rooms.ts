@@ -7,6 +7,7 @@ import { z } from "zod"
 import { newRoomCode, newToken } from "@/lib/codes"
 import { setHostCookie, setVoterCookie, getVoterToken } from "@/lib/auth"
 import { rateLimit, getClientIp } from "@/lib/ratelimit"
+import { READ_ONLY } from "@/lib/feature-flags"
 
 const NameSchema = z.string().trim().min(1).max(32)
 const RoomNameSchema = z.string().trim().min(1).max(48).optional()
@@ -37,6 +38,7 @@ async function checkVoterCap(code: string) {
  * infrastructure so all features (save, share, vs-reality) work identically.
  */
 export async function createSoloRoom() {
+  if (READ_ONLY) throw new Error("READ_ONLY")
   await rateLimit("createRoom", await getClientIp())
   await checkRoomCap()
 
@@ -64,6 +66,7 @@ export async function createSoloRoom() {
 }
 
 export async function createRoom(formData: FormData) {
+  if (READ_ONLY) throw new Error("READ_ONLY")
   await rateLimit("createRoom", await getClientIp())
   await checkRoomCap()
 
@@ -93,6 +96,7 @@ export async function createRoom(formData: FormData) {
 }
 
 export async function joinRoom(formData: FormData) {
+  if (READ_ONLY) redirect(`/join?error=read_only`)
   try {
     await rateLimit("joinRoom", await getClientIp())
   } catch {
@@ -157,6 +161,7 @@ export async function joinRoom(formData: FormData) {
  * Host-only.
  */
 export async function openRoomToFriends(roomCode: string) {
+  if (READ_ONLY) throw new Error("READ_ONLY")
   const code = CodeSchema.parse(roomCode)
   const room = await db.select().from(rooms).where(eq(rooms.code, code)).limit(1)
   if (room.length === 0) throw new Error("ROOM_NOT_FOUND")

@@ -4,6 +4,7 @@ import type { Metadata, Viewport } from "next"
 import { Analytics } from "@vercel/analytics/next"
 import { getLang } from "@/lib/i18n/server"
 import { GlobalLangToggle } from "@/components/GlobalLangToggle"
+import { ReadOnlyBanner } from "@/components/ReadOnlyBanner"
 
 const sora = Sora({
   subsets: ["latin"],
@@ -42,6 +43,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang={lang} className={`${sora.variable} ${inter.variable}`}>
       <body>
+        <ReadOnlyBanner lang={lang} />
         <GlobalLangToggle current={lang} />
         {children}
         <Analytics />

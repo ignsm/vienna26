@@ -8,6 +8,7 @@ import { DOUZE_POINTS } from "@/lib/db/schema"
 import { CONTESTANTS } from "@/lib/contestants"
 import { rateLimit } from "@/lib/ratelimit"
 import { revalidatePath } from "next/cache"
+import { READ_ONLY } from "@/lib/feature-flags"
 
 const Score = z.number().int().min(0).max(10)
 const CodeSchema = z.string().trim().toUpperCase().regex(/^[A-Z0-9]{3,8}$/)
@@ -30,6 +31,7 @@ export async function castVote(input: {
   song: number
   hotness: number
 }) {
+  if (READ_ONLY) throw new Error("READ_ONLY")
   const code = CodeSchema.parse(input.roomCode)
   if (!CONTESTANT_IDS.has(input.contestantId)) throw new Error("BAD_CONTESTANT")
 
@@ -80,6 +82,7 @@ const DouzePicks = z.array(
 ).length(10)
 
 export async function submitDouze(input: { roomCode: string; picks: { contestantId: number; points: number }[] }) {
+  if (READ_ONLY) throw new Error("READ_ONLY")
   const code = CodeSchema.parse(input.roomCode)
   const picks = DouzePicks.parse(input.picks)
 
